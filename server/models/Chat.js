@@ -1,6 +1,6 @@
 const { Schema, model } = require("mongoose");
 
-const ConversationSchema = new Schema(
+const ChatSchema = new Schema(
   {
     users: [
       {
@@ -26,4 +26,4 @@ const ConversationSchema = new Schema(
   { timestamps: true }
 );
 
-module.exports = model("Conversation", ConversationSchema);
+module.exports = model("Chat", ChatSchema);

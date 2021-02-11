@@ -1,6 +1,8 @@
 import React, { useContext, useState, useEffect } from "react";
+import { useSetRecoilState } from "recoil";
 
 import axios from "../axios-instance";
+import { chatsAtom } from "../recoil/atoms";
 
 const AuthContext = React.createContext();
 
@@ -10,14 +12,18 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
+  const setChats = useSetRecoilState(chatsAtom);
 
   function login(userData) {
     return axios
       .post("auth/login", { userData })
       .then((res) => {
+        console.log(res);
+        const { username, fullname, email, userId, chats } = res.data.user;
         localStorage.setItem("message-app-token", res.data.token);
         setToken(res.data.token);
-        setCurrentUser(res.data.user);
+        setCurrentUser({ username, fullname, email, userId });
+        setChats(chats);
       })
       .catch((error) => {
         const message = error.response
@@ -58,8 +64,11 @@ export const AuthProvider = ({ children }) => {
     axios
       .post("auth/user", { token })
       .then((res) => {
+        console.log(res);
+        const { username, fullname, email, userId, chats } = res.data.user;
         setToken(token);
-        setCurrentUser(res.data.user);
+        setCurrentUser({ username, fullname, email, userId });
+        setChats(chats);
         setLoading(false);
       })
       .catch((error) => {

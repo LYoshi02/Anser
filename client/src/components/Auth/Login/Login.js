@@ -42,7 +42,6 @@ const Login = () => {
       setReqLoading(true);
       try {
         await login(values);
-        setReqLoading(false);
       } catch (error) {
         setReqLoading(false);
         toast({

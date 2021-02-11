@@ -52,7 +52,6 @@ const Signup = () => {
       setReqLoading(true);
       try {
         await signup(values);
-        setReqLoading(false);
       } catch (error) {
         setReqLoading(false);
         toast({

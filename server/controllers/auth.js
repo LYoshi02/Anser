@@ -31,8 +31,9 @@ exports.loginUser = async (req, res, next) => {
       email: userExists.email,
       fullname: userExists.fullname,
       username: userExists.username,
+      chats: userExists.chats,
     };
-    const accessToken = generateAcessToken(userData);
+    const accessToken = generateAcessToken({ userId: userData.userId });
 
     res.status(200).json({ user: userData, token: accessToken });
   } catch (error) {
@@ -71,7 +72,7 @@ exports.createUser = async (req, res, next) => {
       fullname: user.fullname,
       username: user.username,
     };
-    const accessToken = generateAcessToken(userData);
+    const accessToken = generateAcessToken({ userId: userData.userId });
 
     res.status(201).json({ user: userData, token: accessToken });
   } catch (error) {
@@ -83,20 +84,26 @@ exports.getUserData = (req, res, next) => {
   const token = req.body.token;
 
   try {
-    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, user) => {
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, async (err, user) => {
       if (err) {
         const error = new Error("El token no es válido");
         error.statusCode = 403;
         throw error;
       }
 
-      const userData = {
-        userId: user.userId,
-        email: user.email,
-        fullname: user.fullname,
-        username: user.username,
-      };
-      res.status(200).json({ user: userData });
+      const userFound = await User.findById(user.userId)
+        .select("_id username fullname email chats")
+        .populate("chats")
+        .exec();
+      res.status(200).json({
+        user: {
+          userId: userFound._id.toString(),
+          email: userFound.email,
+          fullname: userFound.fullname,
+          username: userFound.username,
+          chats: userFound.chats,
+        },
+      });
     });
   } catch (error) {
     next(error);

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const authRoutes = require("./routes/auth");
+const chatsRoutes = require("./routes/chats");
 const usersRoutes = require("./routes/users");
 
 const PORT = process.env.PORT || 8080;
@@ -13,6 +14,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/auth", authRoutes);
+app.use("/chats", chatsRoutes);
 app.use("/users", usersRoutes);
 
 app.use((error, req, res, next) => {
