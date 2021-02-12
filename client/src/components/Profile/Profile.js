@@ -1,24 +1,29 @@
 import React, { useState, useEffect } from "react";
 import {
   Avatar,
+  Box,
   Button,
   Center,
   Container,
   FormControl,
   FormErrorMessage,
   FormLabel,
+  Icon,
+  IconButton,
   Input,
   Stack,
   Text,
   Textarea,
   useToast,
 } from "@chakra-ui/react";
+import { HiPhotograph } from "react-icons/hi";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import axios from "../../axios-instance";
 import BackNav from "../UI/BackNav/BackNav";
 import { useAuth } from "../../context/AuthContext";
+import { Link } from "react-router-dom";
 
 const Profile = () => {
   const { currentUser, token, updateCurrentUser } = useAuth();
@@ -90,7 +95,19 @@ const Profile = () => {
       <BackNav />
       <Container mt="8">
         <Center flexDir="column">
-          <Avatar size="2xl" name={currentUser.fullname}></Avatar>
+          <Box position="relative">
+            <Avatar size="2xl" name={currentUser.fullname}></Avatar>
+            <Link to="/profile/image">
+              <IconButton
+                position="absolute"
+                bottom="0"
+                right="1"
+                rounded="full"
+                colorScheme="yellow"
+                icon={<Icon as={HiPhotograph} w="5" h="5" />}
+              />
+            </Link>
+          </Box>
           <Text fontSize="3xl" mt="2" fontWeight="bold">
             @{currentUser.username}
           </Text>

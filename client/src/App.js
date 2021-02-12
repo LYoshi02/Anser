@@ -11,6 +11,7 @@ import Home from "./components/Home/Home";
 import Landing from "./components/Landing/Landing";
 import Login from "./components/Auth/Login/Login";
 import Profile from "./components/Profile/Profile";
+import ProfileImage from "./components/Profile/ProfileImage/ProfileImage";
 import Signup from "./components/Auth/Signup/Signup";
 import SocketListener from "./components/SocketListener/SocketListener";
 import User from "./components/User/User";
@@ -25,7 +26,8 @@ function App() {
       <SocketListener>
         <Switch>
           <Route exact path="/" component={Home} />
-          <Route path="/profile" component={Profile} />
+          <Route exact path="/profile" component={Profile} />
+          <Route exact path="/profile/image" component={ProfileImage} />
           <Route path="/users/:user" component={User} />
           <Route path="/chats/:user" component={Chat} />
           <Redirect to="/" />
