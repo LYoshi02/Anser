@@ -7,7 +7,17 @@ exports.loginUser = async (req, res, next) => {
   const { email, password } = req.body.userData;
 
   try {
-    const userExists = await User.findOne({ email });
+    const userExists = await User.findOne({ email })
+      .populate({
+        path: "chats",
+        populate: {
+          path: "users",
+          model: "User",
+          select: "username fullname",
+        },
+        options: { sort: { updatedAt: -1 } },
+      })
+      .exec();
 
     if (!userExists) {
       const error = new Error(
@@ -31,6 +41,7 @@ exports.loginUser = async (req, res, next) => {
       email: userExists.email,
       fullname: userExists.fullname,
       username: userExists.username,
+      description: userExists.description,
       chats: userExists.chats,
     };
     const accessToken = generateAcessToken({ userId: userData.userId });
@@ -71,6 +82,7 @@ exports.createUser = async (req, res, next) => {
       email: user.email,
       fullname: user.fullname,
       username: user.username,
+      description: user.description,
     };
     const accessToken = generateAcessToken({ userId: userData.userId });
 
@@ -92,8 +104,16 @@ exports.getUserData = (req, res, next) => {
       }
 
       const userFound = await User.findById(user.userId)
-        .select("_id username fullname email chats")
-        .populate("chats")
+        .select("_id username fullname email chats description")
+        .populate({
+          path: "chats",
+          populate: {
+            path: "users",
+            model: "User",
+            select: "username fullname",
+          },
+          options: { sort: { updatedAt: -1 } },
+        })
         .exec();
       res.status(200).json({
         user: {
@@ -101,6 +121,7 @@ exports.getUserData = (req, res, next) => {
           email: userFound.email,
           fullname: userFound.fullname,
           username: userFound.username,
+          description: userFound.description,
           chats: userFound.chats,
         },
       });

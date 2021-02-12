@@ -9,3 +9,8 @@ export const activeUserAtom = atom({
   key: "activeUser",
   default: null,
 });
+
+export const usersAtom = atom({
+  key: "users",
+  default: [],
+});

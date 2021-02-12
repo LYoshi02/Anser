@@ -36,7 +36,18 @@ mongoose
     }
   )
   .then(() => {
-    app.listen(PORT);
+    const server = app.listen(PORT);
+    const io = require("./socket").init(server);
+
+    io.on("connection", (socket) => {
+      socket.on("startConversation", ({ userId }, callback) => {
+        socket.join(userId);
+      });
+
+      socket.on("newUser", ({ user }) => {
+        socket.broadcast.emit("addNewUser", { user });
+      });
+    });
   })
   .catch((err) => {
     console.log(err);

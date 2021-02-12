@@ -6,6 +6,6 @@ const chatsController = require("../controllers/chats");
 const router = express.Router();
 
 router.post("/new", isAuth, chatsController.createNewChat);
-router.put("/add-message", isAuth);
+router.put("/add-message", isAuth, chatsController.addMessage);
 
 module.exports = router;

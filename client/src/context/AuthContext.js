@@ -2,7 +2,8 @@ import React, { useContext, useState, useEffect } from "react";
 import { useSetRecoilState } from "recoil";
 
 import axios from "../axios-instance";
-import { chatsAtom } from "../recoil/atoms";
+import { chatsAtom, usersAtom } from "../recoil/atoms";
+import { socket } from "../service/socket";
 
 const AuthContext = React.createContext();
 
@@ -13,16 +14,24 @@ export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(null);
   const [currentUser, setCurrentUser] = useState(null);
   const setChats = useSetRecoilState(chatsAtom);
+  const setUsers = useSetRecoilState(usersAtom);
 
   function login(userData) {
     return axios
       .post("auth/login", { userData })
       .then((res) => {
         console.log(res);
-        const { username, fullname, email, userId, chats } = res.data.user;
+        const {
+          username,
+          fullname,
+          email,
+          userId,
+          chats,
+          description,
+        } = res.data.user;
         localStorage.setItem("message-app-token", res.data.token);
         setToken(res.data.token);
-        setCurrentUser({ username, fullname, email, userId });
+        setCurrentUser({ username, fullname, email, userId, description });
         setChats(chats);
       })
       .catch((error) => {
@@ -37,9 +46,11 @@ export const AuthProvider = ({ children }) => {
     return axios
       .put("auth/signup", { userData })
       .then((res) => {
+        const { username, fullname, userId } = res.data.user;
         localStorage.setItem("message-app-token", res.data.token);
         setToken(res.data.token);
         setCurrentUser(res.data.user);
+        socket.emit("newUser", { user: { username, fullname, _id: userId } });
       })
       .catch((error) => {
         const message = error.response
@@ -52,6 +63,17 @@ export const AuthProvider = ({ children }) => {
   function logout() {
     localStorage.removeItem("message-app-token");
     setCurrentUser(null);
+    setChats([]);
+    setUsers([]);
+  }
+
+  function updateCurrentUser(newUserData) {
+    setCurrentUser((prevData) => {
+      return {
+        ...prevData,
+        ...newUserData,
+      };
+    });
   }
 
   useEffect(() => {
@@ -65,21 +87,29 @@ export const AuthProvider = ({ children }) => {
       .post("auth/user", { token })
       .then((res) => {
         console.log(res);
-        const { username, fullname, email, userId, chats } = res.data.user;
+        const {
+          username,
+          fullname,
+          email,
+          userId,
+          description,
+          chats,
+        } = res.data.user;
         setToken(token);
-        setCurrentUser({ username, fullname, email, userId });
+        setCurrentUser({ username, fullname, email, userId, description });
         setChats(chats);
         setLoading(false);
       })
       .catch((error) => {
         console.log(error);
       });
-  }, []);
+  }, [setChats]);
 
   const value = {
     login,
     signup,
     logout,
+    updateCurrentUser,
     token,
     currentUser,
   };

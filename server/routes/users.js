@@ -9,4 +9,6 @@ routes.get("/", isAuth, usersController.getUsers);
 
 routes.get("/:username", isAuth, usersController.getUser);
 
+routes.post("/:username", isAuth, usersController.updateUser);
+
 module.exports = routes;

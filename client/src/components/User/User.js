@@ -36,6 +36,7 @@ const User = (props) => {
         },
       })
       .then((res) => {
+        console.log(res);
         setUser(res.data.user);
         setLoading(false);
       })
@@ -46,7 +47,7 @@ const User = (props) => {
         setError(message);
         setLoading(false);
       });
-  }, [userParam]);
+  }, [userParam, token]);
 
   let userElement = (
     <Flex direction="column" align="center">
@@ -72,7 +73,7 @@ const User = (props) => {
             <Text fontSize="3xl" mt="2" fontWeight="bold">
               {user.fullname}
             </Text>
-            <Text fontSize="lg">Your description goes here...</Text>
+            <Text fontSize="lg">{user.description}</Text>
           </Stack>
           <Link to={`/chats/${user.username}`}>
             <Button colorScheme="purple" isFullWidth mt="4">

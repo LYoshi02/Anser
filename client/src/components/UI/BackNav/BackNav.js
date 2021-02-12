@@ -3,11 +3,11 @@ import { Flex, Icon } from "@chakra-ui/react";
 import { HiChevronLeft } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 
-const BackNav = () => {
+const BackNav = ({ children }) => {
   const history = useHistory();
 
   return (
-    <Flex h="12" minH="12" bg="purple.800" align="center">
+    <Flex h="16" minH="16" bg="purple.800" align="center">
       <Icon
         as={HiChevronLeft}
         w="10"
@@ -16,6 +16,7 @@ const BackNav = () => {
         onClick={() => history.goBack()}
         cursor="pointer"
       />
+      {children}
     </Flex>
   );
 };

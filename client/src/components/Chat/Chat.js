@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, IconButton, Input } from "@chakra-ui/react";
+import { Avatar, Box, Flex, IconButton, Input, Text } from "@chakra-ui/react";
 import BackNav from "../UI/BackNav/BackNav";
 import { HiPaperAirplane } from "react-icons/hi";
 import { useRecoilState } from "recoil";
@@ -32,7 +32,14 @@ const Chat = (props) => {
       });
 
     return () => setActiveUser(null);
-  }, []);
+  }, [setActiveUser, token, userParam]);
+
+  useEffect(() => {
+    if (currentChat && currentChat.newMessage) {
+      const updatedChat = { ...currentChat, newMessage: false };
+      setCurrentChat(updatedChat);
+    }
+  }, [currentChat, setCurrentChat]);
 
   const sendMessage = () => {
     const trimmedText = text.trim();
@@ -59,8 +66,11 @@ const Chat = (props) => {
     })
       .then((res) => {
         console.log(res);
+        setCurrentChat(res.data.chat);
+        setText("");
       })
       .catch((error) => {
+        setText("");
         console.log(error);
       });
   };
@@ -91,7 +101,21 @@ const Chat = (props) => {
 
   return (
     <Flex h="full" direction="column" maxH="100%">
-      <BackNav />
+      <BackNav>
+        <Flex align="center" ml="2" w="full">
+          <Box>
+            <Avatar size="sm" name="Yoshi Debat" mr="2"></Avatar>
+          </Box>
+          <Box>
+            <Text fontWeight="bold" color="white" lineHeight="5">
+              Yoshi Debat
+            </Text>
+            <Text color="white" fontSize="sm" lineHeight="5">
+              En línea
+            </Text>
+          </Box>
+        </Flex>
+      </BackNav>
       <Flex
         direction="column"
         p="2"
@@ -123,21 +147,3 @@ const Chat = (props) => {
 };
 
 export default Chat;
-
-{
-  /* {messages.map((msg) => (
-            <>
-              <Flex my="1" direction="column" align="flex-start">
-                <Box rounded="md" px="2" py="1" bgColor="gray.200">
-                  Un mensaje
-                </Box>
-              </Flex>
-
-              <Flex my="1" direction="column" align="flex-end">
-                <Box rounded="md" px="2" py="1" bgColor="yellow.300">
-                  Un mensaje
-                </Box>
-              </Flex>
-            </>
-          ))} */
-}

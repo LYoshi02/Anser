@@ -21,7 +21,7 @@ exports.getUser = async (req, res, next) => {
     const user = await User.findOne({
       _id: { $not: { $eq: userId } },
       username,
-    }).select("_id username fullname");
+    }).select("_id username fullname description");
 
     if (!user) {
       const error = new Error("Usuario no encontrado");
@@ -30,6 +30,30 @@ exports.getUser = async (req, res, next) => {
     }
 
     res.status(200).json({ user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateUser = async (req, res, next) => {
+  const userId = req.userId;
+  const username = req.params.username;
+
+  try {
+    const user = await User.findOne({ _id: userId, username });
+
+    if (!user) {
+      const error = new Error("Usuario no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    const { fullname, description } = req.body;
+    user.fullname = fullname;
+    user.description = description;
+    await user.save();
+
+    res.status(200).json({ user: { fullname, description } });
   } catch (error) {
     next(error);
   }
