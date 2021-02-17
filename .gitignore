@@ -3,3 +3,4 @@ node_modules/
 
 # Server
 server/nodemon.json
+server/upload/*

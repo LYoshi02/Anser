@@ -67,7 +67,11 @@ const User = (props) => {
   if (!loading && user) {
     userElement = (
       <Flex direction="column" align="center">
-        <Avatar size="2xl" name={user.fullname}></Avatar>
+        <Avatar
+          size="2xl"
+          name={user.fullname}
+          src={user.profileImage && user.profileImage.url}
+        ></Avatar>
         <Box w="full">
           <Stack spacing="2" textAlign="center">
             <Text fontSize="3xl" mt="2" fontWeight="bold">

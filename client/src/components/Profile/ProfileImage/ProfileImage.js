@@ -1,36 +1,92 @@
-import React, { useState } from "react";
-import { Box, Button, Container, Flex } from "@chakra-ui/react";
+import React, { useState, useEffect } from "react";
+import { Container, Flex } from "@chakra-ui/react";
+import { useHistory } from "react-router-dom";
 
+import axios from "../../../axios-instance";
 import BackNav from "../../UI/BackNav/BackNav";
 import ImageCropper from "./ImageCropper/ImageCropper";
+import ImageSelector from "./ImageSelector/ImageSelector";
+import { useAuth } from "../../../context/AuthContext";
+import getCroppedImg from "../../../util/cropImage";
 
 const ProfileImage = () => {
-  const [croppedImage, setCroppedImage] = useState(null);
+  const [image, setImage] = useState(null);
+  const [reqLoading, setReqLoading] = useState(false);
+  const [isCropping, setIsCropping] = useState(false);
+  const { token, updateCurrentUser, currentUser } = useAuth();
+  const history = useHistory();
 
-  const loadImage = (event) => {
-    const data = new FormData();
-    data.append("profilePic", croppedImage);
-    for (var pair of data.entries()) {
-      console.log(pair[0] + ", " + pair[1]);
+  useEffect(() => {
+    if (currentUser.profileImage) {
+      setImage(currentUser.profileImage);
+    }
+  }, [currentUser]);
+
+  const selectNewImage = (img) => {
+    setImage(img);
+    setIsCropping(true);
+  };
+
+  const deleteImage = () => {
+    setReqLoading(true);
+    axios
+      .delete("profile/image", {
+        headers: { authorization: "Bearer " + token },
+      })
+      .then((res) => {
+        updateCurrentUser({ profileImage: null });
+        setImage(null);
+        setReqLoading(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setReqLoading(false);
+      });
+  };
+
+  const uploadImage = async (image, croppedArea) => {
+    setReqLoading(true);
+    try {
+      const croppedImage = await getCroppedImg(image, croppedArea);
+      const blob = await fetch(croppedImage).then((r) => r.blob());
+      const formData = new FormData();
+      formData.append("profileImg", blob);
+
+      const res = await axios.post("profile/image", formData, {
+        headers: { authorization: "Bearer " + token },
+      });
+      updateCurrentUser({ profileImage: res.data.profileImage });
+      setReqLoading(false);
+      history.replace("/profile");
+    } catch (error) {
+      setReqLoading(false);
+      console.log(error);
     }
   };
+
+  let imageComponent = (
+    <ImageSelector
+      image={image}
+      loading={reqLoading}
+      onSelectImage={selectNewImage}
+      onDeleteImage={deleteImage}
+    />
+  );
+  if (image && isCropping) {
+    imageComponent = (
+      <ImageCropper
+        loading={reqLoading}
+        onUploadImage={uploadImage}
+        image={image}
+      />
+    );
+  }
 
   return (
     <Flex minH="full" direction="column">
       <BackNav />
       <Container flexGrow="1" my="4">
-        <ImageCropper
-          onCropImage={(img) => {
-            setCroppedImage(img);
-          }}
-        />
-        <Box>
-          <Button isFullWidth colorScheme="purple" mt="4" onClick={loadImage}>
-            Subir Imagen
-          </Button>
-        </Box>
-
-        <img src={croppedImage} style={{ height: "auto", width: "100%" }} />
+        {imageComponent}
       </Container>
     </Flex>
   );

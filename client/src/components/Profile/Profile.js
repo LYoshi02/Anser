@@ -96,7 +96,11 @@ const Profile = () => {
       <Container mt="8">
         <Center flexDir="column">
           <Box position="relative">
-            <Avatar size="2xl" name={currentUser.fullname}></Avatar>
+            <Avatar
+              name={currentUser.fullname}
+              size="2xl"
+              src={currentUser.profileImage}
+            ></Avatar>
             <Link to="/profile/image">
               <IconButton
                 position="absolute"

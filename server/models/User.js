@@ -32,6 +32,14 @@ const UserSchema = new Schema(
         ref: "Chat",
       },
     ],
+    profileImage: {
+      filename: {
+        type: String,
+      },
+      url: {
+        type: String,
+      },
+    },
   },
   { timestamps: true }
 );

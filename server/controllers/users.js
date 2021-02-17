@@ -5,7 +5,7 @@ exports.getUsers = async (req, res, next) => {
 
   try {
     const users = await User.find({ _id: { $not: { $eq: userId } } })
-      .select("_id username fullname")
+      .select("_id username fullname profileImage.url")
       .sort({ createdAt: -1 });
     res.status(200).json({ users });
   } catch (error) {
@@ -21,7 +21,7 @@ exports.getUser = async (req, res, next) => {
     const user = await User.findOne({
       _id: { $not: { $eq: userId } },
       username,
-    }).select("_id username fullname description");
+    }).select("_id username fullname description profileImage.url");
 
     if (!user) {
       const error = new Error("Usuario no encontrado");

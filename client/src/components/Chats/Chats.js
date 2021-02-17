@@ -10,6 +10,7 @@ const Chats = () => {
   const chats = useRecoilValue(chatsAtom);
   const { currentUser } = useAuth();
 
+  console.log(chats);
   return (
     <Box>
       {chats.map((chat) => {
@@ -27,7 +28,12 @@ const Chats = () => {
               transition="ease-out"
               transitionDuration=".3s"
             >
-              <Avatar size="lg" name={receiver.fullname} mr="4"></Avatar>
+              <Avatar
+                size="lg"
+                name={receiver.fullname}
+                mr="4"
+                src={receiver.profileImage && receiver.profileImage.url}
+              ></Avatar>
               <Flex align="center" justify="space-between" w="full">
                 <Box>
                   <Text fontWeight="bold" fontSize="xl">

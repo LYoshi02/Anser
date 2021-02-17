@@ -28,10 +28,18 @@ export const AuthProvider = ({ children }) => {
           userId,
           chats,
           description,
+          profileImage,
         } = res.data.user;
         localStorage.setItem("message-app-token", res.data.token);
         setToken(res.data.token);
-        setCurrentUser({ username, fullname, email, userId, description });
+        setCurrentUser({
+          username,
+          fullname,
+          email,
+          userId,
+          description,
+          profileImage,
+        });
         setChats(chats);
       })
       .catch((error) => {
@@ -94,9 +102,17 @@ export const AuthProvider = ({ children }) => {
           userId,
           description,
           chats,
+          profileImage,
         } = res.data.user;
         setToken(token);
-        setCurrentUser({ username, fullname, email, userId, description });
+        setCurrentUser({
+          username,
+          fullname,
+          email,
+          userId,
+          description,
+          profileImage,
+        });
         setChats(chats);
         setLoading(false);
       })

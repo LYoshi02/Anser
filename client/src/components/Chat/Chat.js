@@ -99,23 +99,33 @@ const Chat = (props) => {
     });
   }
 
+  let userInfo = null;
+  if (activeUser) {
+    userInfo = (
+      <Flex align="center" ml="2" w="full">
+        <Box>
+          <Avatar
+            size="sm"
+            name={activeUser.fullname}
+            mr="2"
+            src={activeUser.profileImage && activeUser.profileImage.url}
+          />
+        </Box>
+        <Box>
+          <Text fontWeight="bold" color="white" lineHeight="5">
+            {activeUser.fullname}
+          </Text>
+          {/* <Text color="white" fontSize="sm" lineHeight="5">
+            En línea
+          </Text> */}
+        </Box>
+      </Flex>
+    );
+  }
+
   return (
     <Flex h="full" direction="column" maxH="100%">
-      <BackNav>
-        <Flex align="center" ml="2" w="full">
-          <Box>
-            <Avatar size="sm" name="Yoshi Debat" mr="2"></Avatar>
-          </Box>
-          <Box>
-            <Text fontWeight="bold" color="white" lineHeight="5">
-              Yoshi Debat
-            </Text>
-            <Text color="white" fontSize="sm" lineHeight="5">
-              En línea
-            </Text>
-          </Box>
-        </Flex>
-      </BackNav>
+      <BackNav>{userInfo}</BackNav>
       <Flex
         direction="column"
         p="2"

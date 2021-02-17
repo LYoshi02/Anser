@@ -43,6 +43,7 @@ exports.loginUser = async (req, res, next) => {
       username: userExists.username,
       description: userExists.description,
       chats: userExists.chats,
+      profileImage: userExists.profileImage.url,
     };
     const accessToken = generateAcessToken({ userId: userData.userId });
 
@@ -104,13 +105,13 @@ exports.getUserData = (req, res, next) => {
       }
 
       const userFound = await User.findById(user.userId)
-        .select("_id username fullname email chats description")
+        .select("_id username fullname email chats description profileImage")
         .populate({
           path: "chats",
           populate: {
             path: "users",
             model: "User",
-            select: "username fullname",
+            select: "username fullname profileImage.url",
           },
           options: { sort: { updatedAt: -1 } },
         })
@@ -123,6 +124,7 @@ exports.getUserData = (req, res, next) => {
           username: userFound.username,
           description: userFound.description,
           chats: userFound.chats,
+          profileImage: userFound.profileImage.url,
         },
       });
     });

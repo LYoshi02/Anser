@@ -30,7 +30,7 @@ const Users = () => {
 
   return (
     <Box>
-      {users.map(({ username, fullname, _id, newUser }) => (
+      {users.map(({ username, fullname, _id, newUser, profileImage }) => (
         <Link to={`/users/${username}`} key={_id}>
           <Flex
             align="center"
@@ -40,7 +40,12 @@ const Users = () => {
             transition="ease-out"
             transitionDuration=".3s"
           >
-            <Avatar size="lg" name={fullname} mr="4"></Avatar>
+            <Avatar
+              src={profileImage && profileImage.url}
+              size="lg"
+              name={fullname}
+              mr="4"
+            ></Avatar>
             <Box>
               <Text fontWeight="bold" fontSize="xl">
                 {fullname}

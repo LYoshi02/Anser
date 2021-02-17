@@ -11,12 +11,9 @@ import {
   Text,
 } from "@chakra-ui/react";
 
-import getCroppedImg from "./cropImg";
-
-const ImageCropper = ({ onCropImage }) => {
+const ImageCropper = ({ onUploadImage, image, loading }) => {
   const [cropConfig, setCropConfig] = useState({
-    image:
-      "https://images.unsplash.com/photo-1500048993953-d23a436266cf?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=749&q=80",
+    image: image,
     crop: { x: 0, y: 0 },
     zoom: 1,
     aspect: 1 / 1,
@@ -28,25 +25,16 @@ const ImageCropper = ({ onCropImage }) => {
     setCropConfig({ ...cropConfig, crop });
   };
 
-  const onCropComplete = (croppedArea, croppedAreaPixels) => {
-    setCroppedAreaPixels(croppedAreaPixels);
-  };
-
   const onZoomChange = (zoom) => {
     setCropConfig({ ...cropConfig, zoom });
   };
 
+  const onCropComplete = (croppedArea, croppedAreaPixels) => {
+    setCroppedAreaPixels(croppedAreaPixels);
+  };
+
   const finishCrop = async () => {
-    try {
-      const croppedImage = await getCroppedImg(
-        cropConfig.image,
-        croppedAreaPixels
-      );
-      onCropImage(croppedImage);
-      // setCroppedImage(croppedImage)
-    } catch (e) {
-      console.error(e);
-    }
+    onUploadImage(cropConfig.image, croppedAreaPixels);
   };
 
   return (
@@ -75,8 +63,14 @@ const ImageCropper = ({ onCropImage }) => {
           <SliderThumb />
         </Slider>
       </Box>
-      <Button isFullWidth colorScheme="purple" mt="4" onClick={finishCrop}>
-        Finalizar Corte
+      <Button
+        isFullWidth
+        colorScheme="purple"
+        mt="4"
+        onClick={finishCrop}
+        isLoading={loading}
+      >
+        Finalizar y Subir
       </Button>
     </>
   );
