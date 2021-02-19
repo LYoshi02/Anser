@@ -1,20 +1,23 @@
 import React, { useCallback, useState } from "react";
-import { Avatar, Badge, Box, Flex, Text } from "@chakra-ui/react";
-import { Link } from "react-router-dom";
+import { Box } from "@chakra-ui/react";
 import { useRecoilState } from "recoil";
 
 import axios from "../../axios-instance";
+import SearchInput from "./SearchInput/SearchInput";
+import UserPreview from "../UI/Users/UserPreview/UserPreview";
 import { useAuth } from "../../context/AuthContext";
 import { usersAtom } from "../../recoil/atoms";
-import SearchInput from "./SearchInput/SearchInput";
+import UsersLoading from "../UI/Users/UsersLoading/UsersLoading";
+import UsersNotFound from "../UI/Users/UsersNotFound/UsersNotFound";
 
-const Users = () => {
+const Users = ({ selection, onSelectUser }) => {
   const { token } = useAuth();
-  const [search, setSearch] = useState("");
   const [users, setUsers] = useRecoilState(usersAtom);
+  const [loadingReq, setLoadingReq] = useState(false);
 
   const fetchUsers = useCallback(
     (searchQuery = "") => {
+      setLoadingReq(true);
       axios
         .get(`users${searchQuery}`, {
           headers: {
@@ -23,48 +26,34 @@ const Users = () => {
         })
         .then((res) => {
           setUsers(res.data.users);
+          setLoadingReq(false);
         })
         .catch((error) => {
+          setLoadingReq(false);
           console.log(error);
         });
     },
     [setUsers, token]
   );
 
+  let usersElement = <UsersLoading />;
+  if (!loadingReq && users.length > 0) {
+    usersElement = users.map((user) => (
+      <UserPreview
+        key={user._id}
+        userData={user}
+        selection={selection}
+        onSelectUser={onSelectUser}
+      />
+    ));
+  } else if (!loadingReq && users.length === 0) {
+    usersElement = <UsersNotFound />;
+  }
+
   return (
     <Box>
-      <SearchInput
-        search={search}
-        onChangeSearch={(e) => setSearch(e.target.value)}
-        onCleanSearch={() => setSearch("")}
-        onSearchUser={fetchUsers}
-      />
-      {users.map(({ username, fullname, _id, newUser, profileImage }) => (
-        <Link to={`/users/${username}`} key={_id}>
-          <Flex
-            align="center"
-            py="4"
-            px="2"
-            _hover={{ bgColor: "gray.100" }}
-            transition="ease-out"
-            transitionDuration=".3s"
-          >
-            <Avatar
-              src={profileImage && profileImage.url}
-              size="lg"
-              name={fullname}
-              mr="4"
-            ></Avatar>
-            <Box>
-              <Text fontWeight="bold" fontSize="xl">
-                {fullname}
-              </Text>
-              <Text fontSize="md">@{username}</Text>
-              {newUser && <Badge colorScheme="purple">New</Badge>}
-            </Box>
-          </Flex>
-        </Link>
-      ))}
+      <SearchInput onSearchUser={fetchUsers} />
+      {usersElement}
     </Box>
   );
 };

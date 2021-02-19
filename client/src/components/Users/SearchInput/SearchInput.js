@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { HiSearch, HiX } from "react-icons/hi";
 import {
   Box,
@@ -8,12 +8,8 @@ import {
   InputRightElement,
 } from "@chakra-ui/react";
 
-const SearchInput = ({
-  search,
-  onChangeSearch,
-  onSearchUser,
-  onCleanSearch,
-}) => {
+const SearchInput = ({ onSearchUser }) => {
+  const [search, setSearch] = useState("");
   const searchRef = useRef();
 
   useEffect(() => {
@@ -38,13 +34,13 @@ const SearchInput = ({
           placeholder="Buscar usuario"
           ref={searchRef}
           value={search}
-          onChange={onChangeSearch}
+          onChange={(e) => setSearch(e.target.value)}
         />
         {search.trim().length > 0 && (
           <InputRightElement
             children={<HiX />}
             cursor="pointer"
-            onClick={onCleanSearch}
+            onClick={() => setSearch("")}
           />
         )}
       </InputGroup>
