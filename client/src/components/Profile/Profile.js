@@ -29,6 +29,7 @@ const Profile = () => {
   const { currentUser, token, updateCurrentUser } = useAuth();
   const toast = useToast();
   const [isFormValid, setIsFormValid] = useState(false);
+  const [loadingReq, setLoadingReq] = useState(false);
   const formik = useFormik({
     initialValues: {
       fullname: currentUser.fullname,
@@ -45,6 +46,7 @@ const Profile = () => {
       ),
     }),
     onSubmit: (values) => {
+      setLoadingReq(true);
       axios
         .post(`users/${currentUser.username}`, values, {
           headers: {
@@ -53,6 +55,7 @@ const Profile = () => {
         })
         .then((res) => {
           updateCurrentUser(res.data.user);
+          setLoadingReq(false);
           toast({
             title: "Perfil Actualizado",
             description: "Tu perfil se actualizó correctamente",
@@ -62,6 +65,7 @@ const Profile = () => {
         })
         .catch((error) => {
           console.log(error);
+          setLoadingReq(false);
           toast({
             title: "Error",
             description: "Se produjo un error al actualizar tu perfil",
@@ -152,6 +156,7 @@ const Profile = () => {
               type="submit"
               colorScheme="yellow"
               isDisabled={!isFormValid}
+              isLoading={loadingReq}
             >
               Guardar
             </Button>

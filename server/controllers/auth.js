@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 const User = require("../models/User");
 
@@ -54,9 +55,17 @@ exports.loginUser = async (req, res, next) => {
 };
 
 exports.createUser = async (req, res, next) => {
-  const { email, fullname, username, password } = req.body.userData;
+  const errors = validationResult(req);
 
   try {
+    if (!errors.isEmpty()) {
+      const error = new Error("Los campos ingresados no son válidos");
+      error.statusCode = 422;
+      error.data = errors.array();
+      throw error;
+    }
+
+    const { email, fullname, username, password } = req.body.userData;
     const userExists = await User.findOne({ $or: [{ username }, { email }] });
     if (userExists) {
       const message =

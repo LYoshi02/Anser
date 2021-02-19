@@ -24,7 +24,6 @@ const Chat = (props) => {
         },
       })
       .then((res) => {
-        console.log(res);
         setActiveUser(res.data.user);
       })
       .catch((error) => {
@@ -65,7 +64,6 @@ const Chat = (props) => {
       headers: { Authorization: "Bearer " + token },
     })
       .then((res) => {
-        console.log(res);
         setCurrentChat(res.data.chat);
         setText("");
       })

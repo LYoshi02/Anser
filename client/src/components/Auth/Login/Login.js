@@ -14,8 +14,11 @@ import {
   Link,
   FormErrorMessage,
   useToast,
+  InputGroup,
+  InputRightElement,
+  IconButton,
 } from "@chakra-ui/react";
-import { HiChevronLeft } from "react-icons/hi";
+import { HiChevronLeft, HiEye, HiEyeOff } from "react-icons/hi";
 import { useHistory, Link as RouterLink } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -24,6 +27,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 const Login = () => {
   const [reqLoading, setReqLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const history = useHistory();
   const { login } = useAuth();
   const toast = useToast();
@@ -100,13 +104,22 @@ const Login = () => {
                 isInvalid={formik.touched.password && formik.errors.password}
               >
                 <FormLabel>Contraseña</FormLabel>
-                <Input
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
+                <InputGroup>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mínimo 6 caracteres"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      colorScheme="gray"
+                      icon={showPassword ? <HiEye /> : <HiEyeOff />}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
                 <FormErrorMessage>{formik.errors.password}</FormErrorMessage>
               </FormControl>
             </Stack>

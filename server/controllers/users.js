@@ -2,9 +2,18 @@ const User = require("../models/User");
 
 exports.getUsers = async (req, res, next) => {
   const userId = req.userId;
+  const searchedUser = req.query.search;
 
   try {
-    const users = await User.find({ _id: { $not: { $eq: userId } } })
+    let findQuery = { _id: { $not: { $eq: userId } } };
+    if (searchedUser) {
+      findQuery = {
+        ...findQuery,
+        fullname: new RegExp(searchedUser, "i"),
+      };
+    }
+
+    const users = await User.find(findQuery)
       .select("_id username fullname profileImage.url")
       .sort({ createdAt: -1 });
     res.status(200).json({ users });

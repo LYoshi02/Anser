@@ -10,7 +10,6 @@ const Chats = () => {
   const chats = useRecoilValue(chatsAtom);
   const { currentUser } = useAuth();
 
-  console.log(chats);
   return (
     <Box>
       {chats.map((chat) => {

@@ -16,13 +16,16 @@ import {
 import React from "react";
 import { HiDotsVertical, HiUserCircle, HiLogout } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
+import { useRecoilState } from "recoil";
 
 import Chats from "../Chats/Chats";
 import Users from "../Users/Users";
 import { useAuth } from "../../context/AuthContext";
+import { tabIndexAtom } from "../../recoil/atoms";
 
 const Home = () => {
   const history = useHistory();
+  const [tabIndex, setTabIndex] = useRecoilState(tabIndexAtom);
   const { logout } = useAuth();
 
   return (
@@ -62,7 +65,14 @@ const Home = () => {
           </MenuList>
         </Menu>
       </Flex>
-      <Tabs isFitted variant="line" colorScheme="yellow">
+      <Tabs
+        variant="line"
+        colorScheme="yellow"
+        isFitted
+        isLazy
+        index={tabIndex}
+        onChange={(i) => setTabIndex(i)}
+      >
         <TabList>
           <Tab>Chats</Tab>
           <Tab>Usuarios</Tab>

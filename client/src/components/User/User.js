@@ -36,7 +36,6 @@ const User = (props) => {
         },
       })
       .then((res) => {
-        console.log(res);
         setUser(res.data.user);
         setLoading(false);
       })

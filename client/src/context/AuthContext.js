@@ -20,7 +20,6 @@ export const AuthProvider = ({ children }) => {
     return axios
       .post("auth/login", { userData })
       .then((res) => {
-        console.log(res);
         const {
           username,
           fullname,
@@ -61,6 +60,7 @@ export const AuthProvider = ({ children }) => {
         socket.emit("newUser", { user: { username, fullname, _id: userId } });
       })
       .catch((error) => {
+        console.log(error.response);
         const message = error.response
           ? error.response.data.message
           : "Se produjo un error al crear la cuenta";
@@ -94,7 +94,6 @@ export const AuthProvider = ({ children }) => {
     axios
       .post("auth/user", { token })
       .then((res) => {
-        console.log(res);
         const {
           username,
           fullname,

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Flex } from "@chakra-ui/react";
+import { Container, Flex, useToast } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
 
 import axios from "../../../axios-instance";
@@ -15,6 +15,7 @@ const ProfileImage = () => {
   const [isCropping, setIsCropping] = useState(false);
   const { token, updateCurrentUser, currentUser } = useAuth();
   const history = useHistory();
+  const toast = useToast();
 
   useEffect(() => {
     if (currentUser.profileImage) {
@@ -37,10 +38,21 @@ const ProfileImage = () => {
         updateCurrentUser({ profileImage: null });
         setImage(null);
         setReqLoading(false);
+        toast({
+          title: "Imagen Eliminada",
+          description: "Tu imagen se eliminió correctamente.",
+          status: "success",
+          isClosable: true,
+        });
       })
       .catch((error) => {
-        console.log(error);
         setReqLoading(false);
+        toast({
+          title: "Error!",
+          description: "Se produjo un error al eliminar la imagen.",
+          status: "error",
+          isClosable: true,
+        });
       });
   };
 
@@ -57,10 +69,21 @@ const ProfileImage = () => {
       });
       updateCurrentUser({ profileImage: res.data.profileImage });
       setReqLoading(false);
+      toast({
+        title: "Imagen Subida",
+        description: "Tu imagen se subió correctamente.",
+        status: "success",
+        isClosable: true,
+      });
       history.replace("/profile");
     } catch (error) {
       setReqLoading(false);
-      console.log(error);
+      toast({
+        title: "Error!",
+        description: "Se produjo un error al subir la imagen.",
+        status: "error",
+        isClosable: true,
+      });
     }
   };
 

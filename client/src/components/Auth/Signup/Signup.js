@@ -14,8 +14,11 @@ import {
   Link,
   FormErrorMessage,
   useToast,
+  InputRightElement,
+  InputGroup,
+  IconButton,
 } from "@chakra-ui/react";
-import { HiChevronLeft } from "react-icons/hi";
+import { HiChevronLeft, HiEye, HiEyeOff } from "react-icons/hi";
 import { useHistory, Link as RouterLink } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -24,6 +27,7 @@ import { useAuth } from "../../../context/AuthContext";
 
 const Signup = () => {
   const [reqLoading, setReqLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const history = useHistory();
   const toast = useToast();
   const { signup } = useAuth();
@@ -40,9 +44,15 @@ const Signup = () => {
         .required("El email es obligatorio"),
       fullname: Yup.string()
         .trim()
-        .required("El nombre completo es obligatorio"),
+        .required("El nombre completo es obligatorio")
+        .min(3, "El nombre debe tener al menos 3 caracteres")
+        .max(30, "El nombre debe tener hasta 30 caracteres"),
       username: Yup.string()
         .trim()
+        .matches(
+          /^(?!.*\.\.)(?!.*\.$)[^\W][\w.]{0,29}$/gim,
+          "El nombre de usuario no es válido"
+        )
         .required("El nombre de usuario es obligatorio"),
       password: Yup.string()
         .min(6, "La contraseña debe tener al menos 6 caracteres")
@@ -140,13 +150,22 @@ const Signup = () => {
                 isInvalid={formik.touched.password && formik.errors.password}
               >
                 <FormLabel>Contraseña</FormLabel>
-                <Input
-                  type="password"
-                  placeholder="Mínimo 6 caracteres"
-                  value={formik.values.password}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
-                />
+                <InputGroup>
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Mínimo 6 caracteres"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                  />
+                  <InputRightElement>
+                    <IconButton
+                      colorScheme="gray"
+                      icon={showPassword ? <HiEye /> : <HiEyeOff />}
+                      onClick={() => setShowPassword((prev) => !prev)}
+                    />
+                  </InputRightElement>
+                </InputGroup>
                 <FormErrorMessage>{formik.errors.password}</FormErrorMessage>
               </FormControl>
             </Stack>

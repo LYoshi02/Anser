@@ -14,3 +14,8 @@ export const usersAtom = atom({
   key: "users",
   default: [],
 });
+
+export const tabIndexAtom = atom({
+  key: "tab",
+  default: 0,
+});

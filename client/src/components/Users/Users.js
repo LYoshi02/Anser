@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useCallback, useState } from "react";
 import { Avatar, Badge, Box, Flex, Text } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { useRecoilState } from "recoil";
@@ -6,30 +6,39 @@ import { useRecoilState } from "recoil";
 import axios from "../../axios-instance";
 import { useAuth } from "../../context/AuthContext";
 import { usersAtom } from "../../recoil/atoms";
+import SearchInput from "./SearchInput/SearchInput";
 
 const Users = () => {
   const { token } = useAuth();
+  const [search, setSearch] = useState("");
   const [users, setUsers] = useRecoilState(usersAtom);
 
-  useEffect(() => {
-    if (users.length > 0) return;
-    axios
-      .get("/users", {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        console.log(res);
-        setUsers(res.data.users);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, [setUsers, token, users.length]);
+  const fetchUsers = useCallback(
+    (searchQuery = "") => {
+      axios
+        .get(`users${searchQuery}`, {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          setUsers(res.data.users);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    },
+    [setUsers, token]
+  );
 
   return (
     <Box>
+      <SearchInput
+        search={search}
+        onChangeSearch={(e) => setSearch(e.target.value)}
+        onCleanSearch={() => setSearch("")}
+        onSearchUser={fetchUsers}
+      />
       {users.map(({ username, fullname, _id, newUser, profileImage }) => (
         <Link to={`/users/${username}`} key={_id}>
           <Flex
