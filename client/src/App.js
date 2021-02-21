@@ -30,8 +30,8 @@ function App() {
           <Route exact path="/profile" component={Profile} />
           <Route exact path="/profile/image" component={ProfileImage} />
           <Route path="/users/:user" component={User} />
-          <Route path="/chats/:user" component={Chat} />
-          <Route path="/newgroup" component={NewGroup} />
+          <Route path="/chats/:chatId" component={Chat} />
+          <Route path="/new-group" component={NewGroup} />
           <Redirect to="/" />
         </Switch>
       </SocketListener>

@@ -14,6 +14,7 @@ const SocketListener = ({ children }) => {
     socket.emit("startConversation", { userId: currentUser.userId });
 
     socket.on("newChat", ({ chat }) => {
+      console.log(chat);
       setChats((prevChats) => [{ ...chat, newMessage: true }, ...prevChats]);
     });
 

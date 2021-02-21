@@ -52,7 +52,7 @@ const MainNav = () => {
           </MenuItem>
           <MenuItem
             icon={<Icon as={HiUserGroup} w="5" h="5" />}
-            onClick={() => history.push("/newgroup")}
+            onClick={() => history.push("/new-group")}
           >
             Nuevo Grupo
           </MenuItem>

@@ -1,18 +1,18 @@
 import { selector } from "recoil";
 
-import { chatsAtom, activeUserAtom } from "./atoms";
+import { chatsAtom, activeChatIdAtom } from "./atoms";
 
 export const currentChatSelector = selector({
   key: "currentChat",
   get: ({ get }) => {
-    const activeUser = get(activeUserAtom);
+    const activeChatId = get(activeChatIdAtom);
     const chats = get(chatsAtom);
 
-    if (!activeUser || !chats || chats.length === 0) return null;
+    if (!activeChatId || !chats || chats.length === 0) return null;
 
-    const foundConv = chats.find((chat) =>
-      chat.users.some((user) => user._id === activeUser._id)
-    );
+    console.log(chats);
+
+    const foundConv = chats.find((chat) => chat._id === activeChatId);
     return foundConv;
   },
   set: ({ get, set }, newChat) => {

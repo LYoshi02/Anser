@@ -5,8 +5,8 @@ export const chatsAtom = atom({
   default: [],
 });
 
-export const activeUserAtom = atom({
-  key: "activeUser",
+export const activeChatIdAtom = atom({
+  key: "activeChatId",
   default: null,
 });
 

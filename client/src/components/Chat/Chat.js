@@ -5,33 +5,33 @@ import { HiPaperAirplane } from "react-icons/hi";
 import { useRecoilState } from "recoil";
 
 import axios from "../../axios-instance";
-import { activeUserAtom } from "../../recoil/atoms";
+import { activeChatIdAtom } from "../../recoil/atoms";
 import { currentChatSelector } from "../../recoil/selectors";
 import { useAuth } from "../../context/AuthContext";
 
 const Chat = (props) => {
   const { token, currentUser } = useAuth();
   const [text, setText] = useState("");
-  const [activeUser, setActiveUser] = useRecoilState(activeUserAtom);
+  const [receivers, setReceivers] = useState(null);
+  const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdAtom);
   const [currentChat, setCurrentChat] = useRecoilState(currentChatSelector);
 
-  const userParam = props.match.params.user;
-  useEffect(() => {
-    axios
-      .get(`users/${userParam}`, {
-        headers: {
-          authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setActiveUser(res.data.user);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+  console.log(currentChat);
 
-    return () => setActiveUser(null);
-  }, [setActiveUser, token, userParam]);
+  const chatId = props.match.params.chatId;
+  useEffect(() => {
+    setActiveChatId(chatId);
+    return () => setActiveChatId(null);
+  }, [setActiveChatId, chatId]);
+
+  useEffect(() => {
+    if (currentChat) {
+      const receivers = currentChat.users
+        .filter((user) => user._id !== currentUser.userId)
+        .map((u) => u._id);
+      setReceivers(receivers);
+    }
+  }, [currentChat, currentUser.userId]);
 
   useEffect(() => {
     if (currentChat && currentChat.newMessage) {
@@ -44,7 +44,7 @@ const Chat = (props) => {
     const trimmedText = text.trim();
     if (trimmedText.length === 0) return;
 
-    let chatData = { receiver: activeUser._id, text: trimmedText };
+    let chatData = { receivers, text: trimmedText };
     let method = "POST";
     let url = "chats/new";
 
@@ -53,7 +53,7 @@ const Chat = (props) => {
       url = "chats/add-message";
       chatData = {
         ...chatData,
-        chatId: currentChat._id,
+        chatId,
       };
     }
 
@@ -77,13 +77,15 @@ const Chat = (props) => {
   if (currentChat) {
     messages = currentChat.messages.map((msg) => {
       const sentByMe = msg.sender === currentUser.userId;
+      let messageAlignment = "flex-start";
+      if (msg.global) {
+        messageAlignment = "center";
+      } else if (sentByMe) {
+        messageAlignment = "flex-end";
+      }
+
       return (
-        <Flex
-          key={msg._id}
-          my="1"
-          direction="column"
-          align={sentByMe ? "flex-end" : "flex-start"}
-        >
+        <Flex key={msg._id} my="1" direction="column" align={messageAlignment}>
           <Box
             rounded="md"
             px="2"
@@ -98,28 +100,25 @@ const Chat = (props) => {
   }
 
   let userInfo = null;
-  if (activeUser) {
-    userInfo = (
-      <Flex align="center" ml="2" w="full">
-        <Box>
-          <Avatar
-            size="sm"
-            name={activeUser.fullname}
-            mr="2"
-            src={activeUser.profileImage && activeUser.profileImage.url}
-          />
-        </Box>
-        <Box>
-          <Text fontWeight="bold" color="white" lineHeight="5">
-            {activeUser.fullname}
-          </Text>
-          {/* <Text color="white" fontSize="sm" lineHeight="5">
-            En línea
-          </Text> */}
-        </Box>
-      </Flex>
-    );
-  }
+  // if (activeUser) {
+  //   userInfo = (
+  //     <Flex align="center" ml="2" w="full">
+  //       <Box>
+  //         <Avatar
+  //           size="sm"
+  //           name={activeUser.fullname}
+  //           mr="2"
+  //           src={activeUser.profileImage && activeUser.profileImage.url}
+  //         />
+  //       </Box>
+  //       <Box>
+  //         <Text fontWeight="bold" color="white" lineHeight="5">
+  //           {activeUser.fullname}
+  //         </Text>
+  //       </Box>
+  //     </Flex>
+  //   );
+  // }
 
   return (
     <Flex h="full" direction="column" maxH="100%">

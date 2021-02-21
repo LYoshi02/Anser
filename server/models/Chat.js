@@ -20,8 +20,22 @@ const ChatSchema = new Schema(
           type: String,
           required: true,
         },
+        global: {
+          type: Boolean,
+          default: false,
+        },
       },
     ],
+    group: {
+      creator: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      name: {
+        type: String,
+        trim: true,
+      },
+    },
   },
   { timestamps: true }
 );

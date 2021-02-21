@@ -4,10 +4,10 @@ const { getIO } = require("../socket");
 
 exports.createNewChat = async (req, res, next) => {
   const userId = req.userId;
-  const { receiver, text } = req.body.chatData;
+  const { receivers, text } = req.body.chatData;
 
   try {
-    const users = await User.find({ _id: { $in: [userId, receiver] } });
+    const users = await User.find({ _id: { $in: [userId, ...receivers] } });
     const usersFormatted = users.map(({ _id, username, fullname }) => {
       return { _id, username, fullname };
     });
@@ -34,7 +34,12 @@ exports.createNewChat = async (req, res, next) => {
       messages: newChat.messages,
       users: usersFormatted,
     };
-    getIO().to(receiver).emit("newChat", { chat: responseChat });
+
+    usersFormatted.forEach((user) => {
+      if (user._id.toString() !== userId) {
+        getIO().to(user._id.toString()).emit("newChat", { chat: responseChat });
+      }
+    });
 
     res.status(201).json({ chat: responseChat });
   } catch (error) {
@@ -45,12 +50,12 @@ exports.createNewChat = async (req, res, next) => {
 
 exports.addMessage = async (req, res, next) => {
   const userId = req.userId;
-  const { receiver, text, chatId } = req.body.chatData;
+  const { receivers, text, chatId } = req.body.chatData;
 
   try {
     const chat = await Chat.findOne({
       _id: chatId,
-      users: { $in: [userId, receiver] },
+      users: { $in: [userId, ...receivers] },
     }).populate({
       path: "users",
       select: "username fullname",
@@ -69,9 +74,70 @@ exports.addMessage = async (req, res, next) => {
     chat.messages.push(newMessage);
     const result = await chat.save();
 
-    getIO().to(receiver).emit("addMessage", { chat: result });
+    receivers.forEach((receiver) => {
+      if (receiver !== userId) {
+        getIO().to(receiver).emit("addMessage", { chat: result });
+      }
+    });
+
     res.status(200).json({ chat: result });
   } catch (error) {
+    console.log(error);
+    next(error);
+  }
+};
+
+exports.createNewGroup = async (req, res, next) => {
+  const userId = req.userId;
+  const { membersId, name } = req.body.groupData;
+
+  try {
+    const members = await User.find({ _id: { $in: [userId, ...membersId] } });
+
+    const groupCreator = members.find((u) => u._id.toString() === userId);
+    const newChat = new Chat({
+      users: members,
+      messages: [
+        {
+          sender: userId,
+          text: `@${groupCreator.username} ha creado el grupo`,
+          global: true,
+        },
+      ],
+      group: {
+        creator: userId,
+        name: name,
+      },
+    });
+
+    await newChat.save();
+
+    for await (let member of members) {
+      member.chats.push(newChat._id);
+      await member.save();
+    }
+
+    const membersFormatted = members.map(({ _id, username, fullname }) => {
+      return { _id, username, fullname };
+    });
+    const responseChat = {
+      _id: newChat._id,
+      messages: newChat.messages,
+      users: membersFormatted,
+      group: newChat.group,
+    };
+
+    membersFormatted.forEach((member) => {
+      if (member._id.toString() !== userId) {
+        getIO()
+          .to(member._id.toString())
+          .emit("newChat", { chat: responseChat });
+      }
+    });
+
+    res.status(201).json({ chat: responseChat });
+  } catch (error) {
+    console.log(error);
     next(error);
   }
 };

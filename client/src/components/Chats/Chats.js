@@ -1,6 +1,7 @@
 import React from "react";
+import { HiUserGroup } from "react-icons/hi";
 import { useRecoilValue } from "recoil";
-import { Avatar, Box, Flex, Text } from "@chakra-ui/react";
+import { Avatar, Box, Flex, Icon, Text } from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 import { chatsAtom } from "../../recoil/atoms";
@@ -13,12 +14,31 @@ const Chats = () => {
   return (
     <Box>
       {chats.map((chat) => {
-        const receiver = chat.users.find(
-          (user) => user._id !== currentUser.userId
-        );
+        let avatarProps = null,
+          chatName = "",
+          chatLink = "";
+
+        if (chat.group) {
+          avatarProps = {
+            bg: "gray.200",
+            icon: <Icon as={HiUserGroup} w={8} h={8} color="gray.500" />,
+            src: chat.group.image && chat.group.image.url,
+          };
+          chatName = chat.group.name;
+        } else {
+          const receiver = chat.users.find(
+            (user) => user._id !== currentUser.userId
+          );
+          avatarProps = {
+            name: receiver.fullname,
+            src: receiver.profileImage && receiver.profileImage.url,
+          };
+          chatName = receiver.fullname;
+        }
+
         const lastMessage = chat.messages[chat.messages.length - 1];
         return (
-          <Link to={`/chats/${receiver.username}`} key={chat._id}>
+          <Link to={`/chats/${chat._id}`} key={chat._id}>
             <Flex
               align="center"
               px="2"
@@ -27,16 +47,11 @@ const Chats = () => {
               transition="ease-out"
               transitionDuration=".3s"
             >
-              <Avatar
-                size="lg"
-                name={receiver.fullname}
-                mr="4"
-                src={receiver.profileImage && receiver.profileImage.url}
-              ></Avatar>
+              <Avatar size="lg" mr="4" {...avatarProps} />
               <Flex align="center" justify="space-between" w="full">
                 <Box>
                   <Text fontWeight="bold" fontSize="xl">
-                    {receiver.fullname}
+                    {chatName}
                   </Text>
                   <Text
                     fontSize="md"
