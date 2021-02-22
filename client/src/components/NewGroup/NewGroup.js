@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
-import { useSetRecoilState } from "recoil";
+import { useSetRecoilState, useRecoilState } from "recoil";
 import { Badge, Box, Button, Text, Wrap, WrapItem } from "@chakra-ui/react";
 
 import axios from "../../axios-instance";
@@ -18,7 +18,7 @@ const NewGroup = () => {
   const setChats = useSetRecoilState(chatsAtom);
 
   useEffect(() => {
-    setSelectedUsers([]);
+    return () => setSelectedUsers([]);
   }, [setSelectedUsers]);
 
   const selectUser = (user) => {

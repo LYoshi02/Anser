@@ -13,7 +13,6 @@ const Chats = () => {
   const { currentUser } = useAuth();
 
   const orderedChats = orderChatsByDate(chats);
-  console.log(orderedChats);
 
   return (
     <Box>

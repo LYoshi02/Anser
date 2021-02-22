@@ -7,7 +7,7 @@ const BackNav = ({ children }) => {
   const history = useHistory();
 
   return (
-    <Flex h="16" minH="16" bg="purple.800" align="center">
+    <Flex h="14" minH="14" bg="purple.700" align="center">
       <Icon
         as={HiChevronLeft}
         w="10"

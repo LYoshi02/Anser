@@ -65,7 +65,6 @@ exports.createNewChat = async (req, res, next) => {
 
     res.status(201).json({ chat: responseChat });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };
@@ -111,7 +110,6 @@ exports.addMessage = async (req, res, next) => {
 
     res.status(200).json({ chat: result });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };

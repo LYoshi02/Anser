@@ -31,6 +31,8 @@ const MainNav = () => {
       p="2"
       justify="space-between"
       align="center"
+      h="14"
+      minH="14"
     >
       <Heading as="h1" fontSize="lg">
         MessageApp

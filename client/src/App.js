@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import GroupChat from "./components/Chat/GroupChat";
+import GroupInfo from "./components/GroupInfo/GroupInfo";
 import Home from "./components/Home/Home";
 import Landing from "./components/Landing/Landing";
 import Login from "./components/Auth/Login/Login";
@@ -31,6 +32,7 @@ function App() {
           <Route exact path="/profile" component={Profile} />
           <Route exact path="/profile/image" component={ProfileImage} />
           <Route path="/users/:user" component={User} />
+          <Route path="/group/:chatId" component={GroupInfo} />
           <Route path="/chats/group/:chatId" component={GroupChat} />
           <Route exact path="/chats/:user" component={SingleChat} />
           <Route path="/new-group" component={NewGroup} />

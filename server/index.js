@@ -6,6 +6,7 @@ const cors = require("cors");
 
 const authRoutes = require("./routes/auth");
 const chatsRoutes = require("./routes/chats");
+const groupRoutes = require("./routes/group");
 const usersRoutes = require("./routes/users");
 const profileRoutes = require("./routes/profile");
 
@@ -19,6 +20,7 @@ app.use("/upload", express.static(path.join(__dirname, "upload")));
 
 app.use("/auth", authRoutes);
 app.use("/chats", chatsRoutes);
+app.use("/group", groupRoutes);
 app.use("/users", usersRoutes);
 app.use("/profile", profileRoutes);
 
@@ -27,6 +29,7 @@ app.use((error, req, res, next) => {
   const message = error.message;
   const data = error.data;
 
+  console.log(error);
   res.status(status).json({ message: message, data: data });
 });
 

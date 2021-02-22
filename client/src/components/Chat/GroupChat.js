@@ -10,6 +10,7 @@ import { currentGroupChatSelector } from "../../recoil/selectors";
 import { useAuth } from "../../context/AuthContext";
 import Message from "./Message/Message";
 import ChatInfo from "./ChatInfo/ChatInfo";
+import GroupMenu from "./GroupMenu/GroupMenu";
 
 const GroupChat = (props) => {
   const { token, currentUser } = useAuth();
@@ -47,14 +48,15 @@ const GroupChat = (props) => {
     if (trimmedText.length === 0) return;
 
     const receiversIds = receivers.map((r) => r._id);
+    const chatData = {
+      receivers: receiversIds,
+      text: trimmedText,
+      chatId: activeChatId,
+    };
     axios
       .put(
         "chats/add-message",
-        {
-          receivers: receiversIds,
-          text: trimmedText,
-          chatId: activeChatId,
-        },
+        { chatData },
         {
           headers: { authorization: "Bearer " + token },
         }
@@ -82,7 +84,10 @@ const GroupChat = (props) => {
 
   return (
     <Flex h="full" direction="column" maxH="100%">
-      <BackNav>{chatInfo}</BackNav>
+      <BackNav>
+        {chatInfo}
+        <GroupMenu chatId={activeChatId} />
+      </BackNav>
       <Flex
         direction="column"
         p="2"
