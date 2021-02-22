@@ -1,18 +1,21 @@
 import React, { useEffect, useState } from "react";
-import { useRecoilState } from "recoil";
+import { useHistory } from "react-router-dom";
+import { useSetRecoilState } from "recoil";
 import { Badge, Box, Button, Text, Wrap, WrapItem } from "@chakra-ui/react";
 
 import axios from "../../axios-instance";
 import BackNav from "../UI/BackNav/BackNav";
 import Users from "../Users/Users";
 import NameModal from "./NameModal/NameModal";
-import { selectedUsersAtom } from "../../recoil/atoms";
+import { selectedUsersAtom, chatsAtom } from "../../recoil/atoms";
 import { useAuth } from "../../context/AuthContext";
 
 const NewGroup = () => {
   const { token } = useAuth();
+  const history = useHistory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedUsers, setSelectedUsers] = useRecoilState(selectedUsersAtom);
+  const setChats = useSetRecoilState(chatsAtom);
 
   useEffect(() => {
     setSelectedUsers([]);
@@ -35,28 +38,25 @@ const NewGroup = () => {
 
   const createGroup = (name) => {
     // Verifies that there are no repeated ids in the member's array
-    const selectedUsersId = [...new Set(selectedUsers.map((user) => user._id))];
-
-    const groupData = {
-      name,
-      membersId: selectedUsersId,
-    };
+    const selectedUsersIds = [
+      ...new Set(selectedUsers.map((user) => user._id)),
+    ];
 
     axios
       .post(
-        "chats/new-group",
-        { groupData },
+        "chats/new",
+        { chatData: { groupName: name, receivers: selectedUsersIds } },
         {
           headers: { authorization: "Bearer " + token },
         }
       )
       .then((res) => {
-        console.log(res);
+        setChats((prevChats) => [res.data.chat, ...prevChats]);
+        history.replace(`/chats/group/${res.data.chat._id}`);
       })
       .catch((error) => {
         console.log(error);
       });
-    console.log(groupData);
   };
 
   const toggleModal = () => {

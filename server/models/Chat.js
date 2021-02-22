@@ -22,7 +22,6 @@ const ChatSchema = new Schema(
         },
         global: {
           type: Boolean,
-          default: false,
         },
       },
     ],

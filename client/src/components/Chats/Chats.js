@@ -6,17 +6,21 @@ import { Link } from "react-router-dom";
 
 import { chatsAtom } from "../../recoil/atoms";
 import { useAuth } from "../../context/AuthContext";
+import { orderChatsByDate } from "../../util/helpers";
 
 const Chats = () => {
   const chats = useRecoilValue(chatsAtom);
   const { currentUser } = useAuth();
 
+  const orderedChats = orderChatsByDate(chats);
+  console.log(orderedChats);
+
   return (
     <Box>
-      {chats.map((chat) => {
+      {orderedChats.map((chat) => {
         let avatarProps = null,
           chatName = "",
-          chatLink = "";
+          chatUrl = null;
 
         if (chat.group) {
           avatarProps = {
@@ -25,6 +29,7 @@ const Chats = () => {
             src: chat.group.image && chat.group.image.url,
           };
           chatName = chat.group.name;
+          chatUrl = `/chats/group/${chat._id}`;
         } else {
           const receiver = chat.users.find(
             (user) => user._id !== currentUser.userId
@@ -34,11 +39,12 @@ const Chats = () => {
             src: receiver.profileImage && receiver.profileImage.url,
           };
           chatName = receiver.fullname;
+          chatUrl = `/chats/${receiver.username}`;
         }
 
         const lastMessage = chat.messages[chat.messages.length - 1];
         return (
-          <Link to={`/chats/${chat._id}`} key={chat._id}>
+          <Link to={chatUrl} key={chat._id}>
             <Flex
               align="center"
               px="2"

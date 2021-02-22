@@ -115,15 +115,26 @@ exports.getUserData = (req, res, next) => {
 
       const userFound = await User.findById(user.userId)
         .select("_id username fullname email chats description profileImage")
-        .populate({
-          path: "chats",
-          populate: {
-            path: "users",
-            model: "User",
-            select: "username fullname profileImage.url",
+        .populate([
+          {
+            path: "chats",
+            populate: {
+              path: "users",
+              model: "User",
+              select: "username fullname profileImage.url",
+            },
+            options: { sort: { updatedAt: -1 } },
           },
-          options: { sort: { updatedAt: -1 } },
-        })
+          {
+            path: "chats",
+            populate: {
+              path: "messages.sender",
+              model: "User",
+              select: "username fullname profileImage.url",
+            },
+            options: { sort: { updatedAt: -1 } },
+          },
+        ])
         .exec();
       res.status(200).json({
         user: {

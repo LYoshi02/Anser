@@ -112,6 +112,7 @@ export const AuthProvider = ({ children }) => {
           description,
           profileImage,
         });
+        console.log(chats);
         setChats(chats);
         setLoading(false);
       })
