@@ -51,6 +51,7 @@ const NewGroup = () => {
         }
       )
       .then((res) => {
+        console.log(res);
         setChats((prevChats) => [res.data.chat, ...prevChats]);
         history.replace(`/chats/group/${res.data.chat._id}`);
       })

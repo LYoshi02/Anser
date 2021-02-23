@@ -11,7 +11,7 @@ import {
 import { HiDotsVertical } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 
-const GroupMenu = ({ chatId }) => {
+const GroupMenu = ({ chatId, onLeaveGroup }) => {
   const history = useHistory();
 
   return (
@@ -27,6 +27,9 @@ const GroupMenu = ({ chatId }) => {
         <MenuList color="gray.900" shadow="md">
           <MenuItem onClick={() => history.push(`/group/${chatId}`)}>
             Info. del grupo
+          </MenuItem>
+          <MenuItem onClick={onLeaveGroup} color="red.700">
+            Abandonar Grupo
           </MenuItem>
         </MenuList>
       </Menu>

@@ -19,11 +19,13 @@ import { activeChatIdAtom, selectedUsersAtom } from "../../recoil/atoms";
 import { currentGroupChatSelector } from "../../recoil/selectors";
 import BackNav from "../UI/BackNav/BackNav";
 import UserPreview from "../UI/Users/UserPreview/UserPreview";
+import Member from "./Member/Member";
 import MembersModal from "./MembersModal/MembersModal";
 
 const GroupInfo = (props) => {
   const [membersModalOpen, setMembersModalOpen] = useState(false);
-  const { token } = useAuth();
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { token, currentUser } = useAuth();
   const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdAtom);
   const [currentChat, setCurrentChat] = useRecoilState(
     currentGroupChatSelector
@@ -31,6 +33,20 @@ const GroupInfo = (props) => {
   const [selectedMembers, setSelectedMembers] = useRecoilState(
     selectedUsersAtom
   );
+
+  const chatIdParam = props.match.params.chatId;
+  useEffect(() => {
+    setActiveChatId(chatIdParam);
+    return () => setActiveChatId(null);
+  }, [setActiveChatId, chatIdParam]);
+
+  useEffect(() => {
+    if (currentChat) {
+      setIsAdmin(
+        currentChat.group.admins.some((admin) => admin === currentUser.userId)
+      );
+    }
+  }, [currentChat]);
 
   const selectMember = (user) => {
     setSelectedMembers((prevUsers) => {
@@ -76,11 +92,68 @@ const GroupInfo = (props) => {
       });
   };
 
-  const chatIdParam = props.match.params.chatId;
-  useEffect(() => {
-    setActiveChatId(chatIdParam);
-    return () => setActiveChatId(null);
-  }, [setActiveChatId, chatIdParam]);
+  const addAdmin = (newAdminId) => {
+    axios
+      .post(
+        "group/add-admin",
+        {
+          adminId: newAdminId,
+          chatId: activeChatId,
+        },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setCurrentChat(res.data.chat);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const removeAdmin = (adminId) => {
+    axios
+      .post(
+        "group/remove-admin",
+        {
+          adminId,
+          chatId: activeChatId,
+        },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setCurrentChat(res.data.chat);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const removeMember = (memberId) => {
+    axios
+      .post(
+        "group/remove-member",
+        {
+          memberId,
+          chatId: activeChatId,
+        },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        setCurrentChat(res.data.chat);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const toggleModal = () => {
     setSelectedMembers([]);
@@ -90,23 +163,15 @@ const GroupInfo = (props) => {
   let groupMembers = null;
   if (currentChat) {
     groupMembers = currentChat.users.map((user) => (
-      <Flex
+      <Member
         key={user._id}
-        py="4"
-        px="2"
-        _hover={{ bgColor: "gray.100" }}
-        transition="ease-out"
-        transitionDuration=".3s"
-        justify="space-between"
-        align="center"
-      >
-        <UserPreview userData={user} />
-        {user._id === currentChat.group.creator && (
-          <Badge colorScheme="purple" variant="subtle">
-            Admin
-          </Badge>
-        )}
-      </Flex>
+        user={user}
+        isAdmin={isAdmin}
+        admins={currentChat.group.admins}
+        onAddAdmin={() => addAdmin(user._id)}
+        onRemoveAdmin={() => removeAdmin(user._id)}
+        onRemoveMember={() => removeMember(user._id)}
+      />
     ));
   }
 

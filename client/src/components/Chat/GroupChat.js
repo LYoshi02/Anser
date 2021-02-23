@@ -72,6 +72,23 @@ const GroupChat = (props) => {
       });
   };
 
+  const leaveGroup = () => {
+    axios
+      .post(
+        "group/leave",
+        { chatId: activeChatId },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   let messages = null,
     chatInfo = null;
   if (currentChat && receivers) {
@@ -86,7 +103,7 @@ const GroupChat = (props) => {
     <Flex h="full" direction="column" maxH="100%">
       <BackNav>
         {chatInfo}
-        <GroupMenu chatId={activeChatId} />
+        <GroupMenu chatId={activeChatId} onLeaveGroup={leaveGroup} />
       </BackNav>
       <Flex
         direction="column"

@@ -8,9 +8,16 @@ exports.createNewChat = async (req, res, next) => {
 
   try {
     const users = await User.find({ _id: { $in: [userId, ...receivers] } });
-    const usersFormatted = users.map(({ _id, username, fullname }) => {
-      return { _id, username, fullname };
-    });
+    const usersFormatted = users.map(
+      ({ _id, username, fullname, profileImage }) => {
+        return {
+          _id,
+          username,
+          fullname,
+          profileImage: { url: profileImage.url },
+        };
+      }
+    );
 
     const senderData = users.find((u) => u._id.toString() === userId);
     let newChatProperties = { users };
@@ -25,8 +32,9 @@ exports.createNewChat = async (req, res, next) => {
           },
         ],
         group: {
-          creator: senderData._id.toString(),
+          creator: senderData._id,
           name: groupName,
+          admins: [senderData._id],
         },
       };
     } else {
@@ -41,6 +49,7 @@ exports.createNewChat = async (req, res, next) => {
       };
     }
 
+    console.log(newChatProperties);
     const newChat = new Chat({ ...newChatProperties });
     await newChat.save();
 
@@ -48,6 +57,8 @@ exports.createNewChat = async (req, res, next) => {
       user.chats.push(newChat._id);
       await user.save();
     }
+
+    console.log(newChat);
 
     const responseChat = {
       _id: newChat._id,
@@ -73,6 +84,7 @@ exports.addMessage = async (req, res, next) => {
   const userId = req.userId;
   const { receivers, text, chatId } = req.body.chatData;
 
+  console.log(req.body);
   try {
     const chat = await Chat.findOne({
       _id: chatId,
