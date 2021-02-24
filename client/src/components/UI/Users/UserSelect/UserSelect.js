@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Box, Checkbox, Flex } from "@chakra-ui/react";
+import { Checkbox, Flex } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
 import { selectedUsersAtom } from "../../../../recoil/atoms";

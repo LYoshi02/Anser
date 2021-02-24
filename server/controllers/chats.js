@@ -49,7 +49,6 @@ exports.createNewChat = async (req, res, next) => {
       };
     }
 
-    console.log(newChatProperties);
     const newChat = new Chat({ ...newChatProperties });
     await newChat.save();
 
@@ -57,8 +56,6 @@ exports.createNewChat = async (req, res, next) => {
       user.chats.push(newChat._id);
       await user.save();
     }
-
-    console.log(newChat);
 
     const responseChat = {
       _id: newChat._id,
@@ -84,21 +81,11 @@ exports.addMessage = async (req, res, next) => {
   const userId = req.userId;
   const { receivers, text, chatId } = req.body.chatData;
 
-  console.log(req.body);
   try {
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $in: [userId, ...receivers] },
-    }).populate([
-      {
-        path: "users",
-        select: "username fullname profileImage.url",
-      },
-      {
-        path: "messages.sender",
-        select: "username fullname profileImage.url",
-      },
-    ]);
+    });
 
     if (!chat) {
       const error = new Error("Chat no encontrado");
@@ -106,21 +93,26 @@ exports.addMessage = async (req, res, next) => {
       throw error;
     }
 
-    const senderData = chat.users.find((u) => u._id.toString() === userId);
+    const senderData = await User.findById(userId).select(
+      "username fullname profileImage.url"
+    );
     const newMessage = {
       sender: senderData,
       text,
     };
     chat.messages.push(newMessage);
-    const result = await chat.save();
+    await chat.save();
 
+    const lastMessage = chat.messages[chat.messages.length - 1];
     receivers.forEach((receiver) => {
       if (receiver !== userId) {
-        getIO().to(receiver).emit("addMessage", { chat: result });
+        getIO()
+          .to(receiver)
+          .emit("addMessage", { chatId: chatId, message: lastMessage });
       }
     });
 
-    res.status(200).json({ chat: result });
+    res.status(200).json({ message: lastMessage });
   } catch (error) {
     next(error);
   }

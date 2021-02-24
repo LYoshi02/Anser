@@ -26,23 +26,23 @@ const ChatSchema = new Schema(
       },
     ],
     group: {
-      type: {
-        creator: {
-          type: Schema.Types.ObjectId,
-          ref: "User",
-        },
-        name: {
-          type: String,
-          trim: true,
-        },
-        admins: [
+      creator: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+      name: {
+        type: String,
+        trim: true,
+      },
+      admins: {
+        type: [
           {
             type: Schema.Types.ObjectId,
             ref: "User",
           },
         ],
+        default: undefined,
       },
-      required: false,
     },
   },
   { timestamps: true }

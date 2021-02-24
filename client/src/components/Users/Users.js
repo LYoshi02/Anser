@@ -42,7 +42,7 @@ const Users = ({ selection, onSelectUser, selectedUsers }) => {
           console.log(error);
         });
     },
-    [setUsers, token]
+    [setUsers, token, selectedUsers]
   );
 
   let usersElement = <UsersLoading />;

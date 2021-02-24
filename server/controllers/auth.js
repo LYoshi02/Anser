@@ -134,6 +134,14 @@ exports.getUserData = (req, res, next) => {
             },
             options: { sort: { updatedAt: -1 } },
           },
+          {
+            path: "chats",
+            populate: {
+              path: "group",
+              model: "Group",
+            },
+            options: { sort: { updatedAt: -1 } },
+          },
         ])
         .exec();
       res.status(200).json({

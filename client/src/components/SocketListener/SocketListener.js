@@ -15,14 +15,50 @@ const SocketListener = ({ children }) => {
 
     socket.on("newChat", ({ chat }) => {
       console.log(chat);
-      setChats((prevChats) => [{ ...chat, newMessage: true }, ...prevChats]);
+      setChats((prevChats) => {
+        const newChat = { ...chat, newMessage: true };
+        const chatChangedIndex = prevChats.findIndex(
+          (chat) => chat._id === newChat._id
+        );
+        let updatedChats = [...prevChats];
+        if (chatChangedIndex !== -1) {
+          // Replacing an already existing chat
+          updatedChats.splice(chatChangedIndex, 1, newChat);
+        } else {
+          // Adding a new chat to the whole array of chats
+          updatedChats.unshift(newChat);
+        }
+
+        return updatedChats;
+      });
     });
 
-    socket.on("addMessage", ({ chat }) => {
+    socket.on("addMessage", ({ chatId, message }) => {
       setChats((prevChats) =>
-        prevChats.map((c) =>
-          c._id !== chat._id ? c : { ...chat, newMessage: true }
-        )
+        prevChats.map((chat) => {
+          if (chat._id === chatId) {
+            return {
+              ...chat,
+              messages: [...chat.messages, message],
+              newMessage: true,
+            };
+          }
+          return chat;
+        })
+      );
+    });
+
+    socket.on("updateChat", ({ chatId, updatedProperties }) => {
+      setChats((prevChats) =>
+        prevChats.map((chat) => {
+          if (chat._id === chatId) {
+            return {
+              ...chat,
+              ...updatedProperties,
+            };
+          }
+          return chat;
+        })
       );
     });
 

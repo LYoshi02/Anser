@@ -52,12 +52,12 @@ const SingleChat = (props) => {
     let url = "chats/new";
 
     if (currentChat) {
-      method = "PUT";
-      url = "chats/add-message";
       chatData = {
         ...chatData,
         chatId: currentChat._id,
       };
+      method = "PUT";
+      url = "chats/add-message";
     }
 
     axios({
@@ -67,8 +67,17 @@ const SingleChat = (props) => {
       headers: { Authorization: "Bearer " + token },
     })
       .then((res) => {
-        console.log(res);
-        setCurrentChat(res.data.chat);
+        let updatedChat;
+        if (currentChat) {
+          updatedChat = {
+            ...currentChat,
+            messages: [...currentChat.messages, res.data.message],
+          };
+        } else {
+          updatedChat = res.data.chat;
+        }
+
+        setCurrentChat(updatedChat);
         setText("");
       })
       .catch((error) => {

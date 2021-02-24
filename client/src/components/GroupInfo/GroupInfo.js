@@ -1,5 +1,4 @@
 import {
-  Badge,
   Box,
   Button,
   Container,
@@ -18,7 +17,6 @@ import { useAuth } from "../../context/AuthContext";
 import { activeChatIdAtom, selectedUsersAtom } from "../../recoil/atoms";
 import { currentGroupChatSelector } from "../../recoil/selectors";
 import BackNav from "../UI/BackNav/BackNav";
-import UserPreview from "../UI/Users/UserPreview/UserPreview";
 import Member from "./Member/Member";
 import MembersModal from "./MembersModal/MembersModal";
 
@@ -46,7 +44,7 @@ const GroupInfo = (props) => {
         currentChat.group.admins.some((admin) => admin === currentUser.userId)
       );
     }
-  }, [currentChat]);
+  }, [currentChat, currentUser.userId]);
 
   const selectMember = (user) => {
     setSelectedMembers((prevUsers) => {
@@ -82,8 +80,9 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        console.log(res);
-        setCurrentChat(res.data.chat);
+        const currentChatUpdated = { ...currentChat, ...res.data };
+
+        setCurrentChat(currentChatUpdated);
         setMembersModalOpen(false);
       })
       .catch((error) => {
@@ -91,6 +90,8 @@ const GroupInfo = (props) => {
         setMembersModalOpen(false);
       });
   };
+
+  console.log(currentChat);
 
   const addAdmin = (newAdminId) => {
     axios
@@ -105,8 +106,8 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        console.log(res);
-        setCurrentChat(res.data.chat);
+        const currentChatUpdated = { ...currentChat, ...res.data };
+        setCurrentChat(currentChatUpdated);
       })
       .catch((error) => {
         console.log(error);
@@ -126,8 +127,8 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        console.log(res);
-        setCurrentChat(res.data.chat);
+        const currentChatUpdated = { ...currentChat, ...res.data };
+        setCurrentChat(currentChatUpdated);
       })
       .catch((error) => {
         console.log(error);
@@ -147,8 +148,8 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        console.log(res);
-        setCurrentChat(res.data.chat);
+        const currentChatUpdated = { ...currentChat, ...res.data };
+        setCurrentChat(currentChatUpdated);
       })
       .catch((error) => {
         console.log(error);
