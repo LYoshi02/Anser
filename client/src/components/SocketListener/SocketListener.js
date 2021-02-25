@@ -14,7 +14,15 @@ const SocketListener = ({ children }) => {
     socket.emit("startConversation", { userId: currentUser.userId });
 
     socket.on("newChat", ({ chat }) => {
-      console.log(chat);
+      setChats((prevChats) => {
+        const newChat = { ...chat, newMessage: true };
+        const updatedChats = [...prevChats];
+        updatedChats.unshift(newChat);
+        return updatedChats;
+      });
+    });
+
+    socket.on("newGroupChat", ({ chat }) => {
       setChats((prevChats) => {
         const newChat = { ...chat, newMessage: true };
         const chatChangedIndex = prevChats.findIndex(

@@ -2,7 +2,7 @@ const Chat = require("../models/Chat");
 
 module.exports = async (req, res, next) => {
   const userId = req.userId;
-  const { chatId } = req.body;
+  const chatId = req.params.chatId;
 
   try {
     const chat = await Chat.findOne({

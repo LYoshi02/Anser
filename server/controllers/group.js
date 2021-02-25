@@ -1,10 +1,13 @@
+const { validationResult } = require("express-validator");
+
 const Chat = require("../models/Chat");
 const User = require("../models/User");
 const { getIO } = require("../socket");
 
 exports.addMembers = async (req, res, next) => {
   const userId = req.userId;
-  const { newMembers, chatId } = req.body;
+  const chatId = req.params.chatId;
+  const { newMembers } = req.body;
 
   try {
     const chat = await Chat.findOne({
@@ -38,7 +41,7 @@ exports.addMembers = async (req, res, next) => {
         _id: { $in: [...newMembers] },
       },
       {
-        $addToSet: { chats: chat._id }, // To prevent push duplicated chats
+        $addToSet: { chats: chat._id }, // To prevent pushing duplicated chats
       }
     );
 
@@ -56,7 +59,7 @@ exports.addMembers = async (req, res, next) => {
     await chat.save();
 
     newMembersData.forEach((member) => {
-      getIO().to(member._id.toString()).emit("newChat", {
+      getIO().to(member._id.toString()).emit("newGroupChat", {
         chat,
       });
     });
@@ -77,17 +80,17 @@ exports.addMembers = async (req, res, next) => {
 
     res.status(200).json({
       users: chat.users,
-      messages: addMembersMessages,
+      messages: chat.messages,
     });
   } catch (error) {
     next(error);
   }
 };
 
-// TODO: remove from users and from admins
 exports.removeMember = async (req, res, next) => {
   const userId = req.userId;
-  const { memberId, chatId } = req.body;
+  const chatId = req.params.chatId;
+  const { userChangedId } = req.body;
 
   try {
     const chat = await Chat.findOne({
@@ -111,7 +114,9 @@ exports.removeMember = async (req, res, next) => {
     }
 
     const senderData = chat.users.find((u) => u._id.toString() === userId);
-    const removedMember = chat.users.find((u) => u._id.toString() === memberId);
+    const removedMember = chat.users.find(
+      (u) => u._id.toString() === userChangedId
+    );
     const removedMemberMessage = {
       sender: senderData,
       text: `@${senderData.username} ha eliminado a @${removedMember.username}`,
@@ -120,8 +125,8 @@ exports.removeMember = async (req, res, next) => {
     const previousUsers = [...chat.users];
 
     chat.messages.push(removedMemberMessage);
-    chat.users.pull(memberId);
-    chat.group.admins.pull(memberId);
+    chat.users.pull(userChangedId);
+    chat.group.admins.pull(userChangedId);
     await chat.save();
 
     previousUsers.forEach((receiver) => {
@@ -133,12 +138,15 @@ exports.removeMember = async (req, res, next) => {
             updatedProperties: {
               users: chat.users,
               messages: chat.messages,
+              group: chat.group,
             },
           });
       }
     });
 
-    res.status(200).json({ users: chat.users, messages: chat.messages });
+    res
+      .status(200)
+      .json({ users: chat.users, messages: chat.messages, group: chat.group });
   } catch (error) {
     next(error);
   }
@@ -146,7 +154,8 @@ exports.removeMember = async (req, res, next) => {
 
 exports.addAdmin = async (req, res, next) => {
   const userId = req.userId;
-  const { chatId, adminId } = req.body;
+  const chatId = req.params.chatId;
+  const { userChangedId } = req.body;
 
   try {
     const chat = await Chat.findOne({
@@ -160,7 +169,7 @@ exports.addAdmin = async (req, res, next) => {
       throw error;
     }
 
-    chat.group.admins.push(adminId);
+    chat.group.admins.push(userChangedId);
     await chat.save();
 
     chat.users.forEach((receiver) => {
@@ -182,7 +191,8 @@ exports.addAdmin = async (req, res, next) => {
 
 exports.removeAdmin = async (req, res, next) => {
   const userId = req.userId;
-  const { chatId, adminId } = req.body;
+  const chatId = req.params.chatId;
+  const { userChangedId } = req.body;
 
   try {
     const chat = await Chat.findOne({
@@ -196,7 +206,7 @@ exports.removeAdmin = async (req, res, next) => {
       throw error;
     }
 
-    chat.group.admins.pull(adminId);
+    chat.group.admins.pull(userChangedId);
     await chat.save();
 
     chat.users.forEach((receiver) => {
@@ -217,10 +227,17 @@ exports.removeAdmin = async (req, res, next) => {
 };
 
 exports.leaveGroup = async (req, res, next) => {
-  const userId = req.userId;
-  const { chatId } = req.body;
+  const errors = validationResult(req);
 
   try {
+    if (!errors.isEmpty()) {
+      const error = new Error(errors.array()[0].msg);
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const userId = req.userId;
+    const chatId = req.params.chatId;
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $in: [userId] },
@@ -250,17 +267,26 @@ exports.leaveGroup = async (req, res, next) => {
 
     chat.users.pull(userId);
     chat.group.admins.pull(userId);
-    const result = await chat.save();
+    await chat.save();
 
     chat.users.forEach((receiver) => {
       if (receiver._id.toString() !== userId) {
         getIO()
           .to(receiver._id.toString())
-          .emit("addMessage", { chat: result });
+          .emit("updateChat", {
+            chatId,
+            updatedProperties: {
+              users: chat.users,
+              group: chat.group,
+              messages: chat.messages,
+            },
+          });
       }
     });
 
-    res.status(200).json({ chat: result });
+    res
+      .status(200)
+      .json({ users: chat.users, group: chat.group, messages: chat.messages });
   } catch (error) {
     next(error);
   }

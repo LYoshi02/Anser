@@ -46,6 +46,66 @@ const GroupInfo = (props) => {
     }
   }, [currentChat, currentUser.userId]);
 
+  const groupAction = (actionName, userChangedId) => {
+    if (!activeChatId || !actionName || !userChangedId) return;
+
+    let url = `group/${activeChatId}`;
+    if (actionName === "ADD_ADMIN") {
+      url += "/add-admin";
+    } else if (actionName === "REMOVE_ADMIN") {
+      url += "/remove-admin";
+    } else if (actionName === "REMOVE_MEMBER") {
+      url += "/remove-member";
+    }
+
+    axios
+      .post(
+        url,
+        { userChangedId },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        updatedCurrentChat(res.data);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const addMembersToGroup = () => {
+    if (selectedMembers.length === 0) return;
+
+    const selectedMembersIds = [
+      ...new Set(selectedMembers.map((user) => user._id)),
+    ];
+
+    axios
+      .post(
+        `group/${activeChatId}/add-members`,
+        {
+          newMembers: selectedMembersIds,
+        },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        updatedCurrentChat(res.data);
+        setMembersModalOpen(false);
+      })
+      .catch((error) => {
+        console.log(error);
+        setMembersModalOpen(false);
+      });
+  };
+
+  const updatedCurrentChat = (updatedProperties) => {
+    const currentChatUpdated = { ...currentChat, ...updatedProperties };
+    setCurrentChat(currentChatUpdated);
+  };
+
   const selectMember = (user) => {
     setSelectedMembers((prevUsers) => {
       const usersUpdated = [...prevUsers];
@@ -61,101 +121,6 @@ const GroupInfo = (props) => {
     });
   };
 
-  const addMembersToGroup = () => {
-    if (selectedMembers.length === 0) return;
-
-    const selectedMembersIds = [
-      ...new Set(selectedMembers.map((user) => user._id)),
-    ];
-
-    axios
-      .post(
-        "group/add-members",
-        {
-          chatId: activeChatId,
-          newMembers: selectedMembersIds,
-        },
-        {
-          headers: { authorization: "Bearer " + token },
-        }
-      )
-      .then((res) => {
-        const currentChatUpdated = { ...currentChat, ...res.data };
-
-        setCurrentChat(currentChatUpdated);
-        setMembersModalOpen(false);
-      })
-      .catch((error) => {
-        console.log(error);
-        setMembersModalOpen(false);
-      });
-  };
-
-  console.log(currentChat);
-
-  const addAdmin = (newAdminId) => {
-    axios
-      .post(
-        "group/add-admin",
-        {
-          adminId: newAdminId,
-          chatId: activeChatId,
-        },
-        {
-          headers: { authorization: "Bearer " + token },
-        }
-      )
-      .then((res) => {
-        const currentChatUpdated = { ...currentChat, ...res.data };
-        setCurrentChat(currentChatUpdated);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const removeAdmin = (adminId) => {
-    axios
-      .post(
-        "group/remove-admin",
-        {
-          adminId,
-          chatId: activeChatId,
-        },
-        {
-          headers: { authorization: "Bearer " + token },
-        }
-      )
-      .then((res) => {
-        const currentChatUpdated = { ...currentChat, ...res.data };
-        setCurrentChat(currentChatUpdated);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  const removeMember = (memberId) => {
-    axios
-      .post(
-        "group/remove-member",
-        {
-          memberId,
-          chatId: activeChatId,
-        },
-        {
-          headers: { authorization: "Bearer " + token },
-        }
-      )
-      .then((res) => {
-        const currentChatUpdated = { ...currentChat, ...res.data };
-        setCurrentChat(currentChatUpdated);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
   const toggleModal = () => {
     setSelectedMembers([]);
     setMembersModalOpen((prevState) => !prevState);
@@ -169,9 +134,7 @@ const GroupInfo = (props) => {
         user={user}
         isAdmin={isAdmin}
         admins={currentChat.group.admins}
-        onAddAdmin={() => addAdmin(user._id)}
-        onRemoveAdmin={() => removeAdmin(user._id)}
-        onRemoveMember={() => removeMember(user._id)}
+        onGroupAction={(action) => groupAction(action, user._id)}
       />
     ));
   }
@@ -193,9 +156,15 @@ const GroupInfo = (props) => {
             <Text fontWeight="bold" fontSize="lg">
               Miembros
             </Text>
-            <Button colorScheme="purple" variant="ghost" onClick={toggleModal}>
-              Añadir Miembros
-            </Button>
+            {isAdmin && (
+              <Button
+                colorScheme="purple"
+                variant="ghost"
+                onClick={toggleModal}
+              >
+                Añadir Miembros
+              </Button>
+            )}
           </Flex>
           <Box mt="2">{groupMembers}</Box>
         </Box>

@@ -7,16 +7,9 @@ exports.createNewChat = async (req, res, next) => {
   const { receivers, text, groupName } = req.body.chatData;
 
   try {
-    const users = await User.find({ _id: { $in: [userId, ...receivers] } });
-    const usersFormatted = users.map(
-      ({ _id, username, fullname, profileImage }) => {
-        return {
-          _id,
-          username,
-          fullname,
-          profileImage: { url: profileImage.url },
-        };
-      }
+    const chatUsersIds = [userId, ...receivers];
+    const users = await User.find({ _id: { $in: chatUsersIds } }).select(
+      "username fullname profileImage.url"
     );
 
     const senderData = users.find((u) => u._id.toString() === userId);
@@ -52,26 +45,22 @@ exports.createNewChat = async (req, res, next) => {
     const newChat = new Chat({ ...newChatProperties });
     await newChat.save();
 
-    for await (let user of users) {
-      user.chats.push(newChat._id);
-      await user.save();
-    }
+    await User.updateMany(
+      {
+        _id: { $in: chatUsersIds },
+      },
+      {
+        $addToSet: { chats: newChat._id }, // To prevent pushing duplicated chats
+      }
+    );
 
-    const responseChat = {
-      _id: newChat._id,
-      messages: newChat.messages,
-      users: usersFormatted,
-      updatedAt: newChat.updatedAt,
-      group: groupName && newChat.group,
-    };
-
-    usersFormatted.forEach((user) => {
+    users.forEach((user) => {
       if (user._id.toString() !== userId) {
-        getIO().to(user._id.toString()).emit("newChat", { chat: responseChat });
+        getIO().to(user._id.toString()).emit("newChat", { chat: newChat });
       }
     });
 
-    res.status(201).json({ chat: responseChat });
+    res.status(201).json({ chat: newChat });
   } catch (error) {
     next(error);
   }
@@ -84,7 +73,7 @@ exports.addMessage = async (req, res, next) => {
   try {
     const chat = await Chat.findOne({
       _id: chatId,
-      users: { $in: [userId, ...receivers] },
+      users: { $all: [userId, ...receivers] },
     });
 
     if (!chat) {
@@ -106,9 +95,10 @@ exports.addMessage = async (req, res, next) => {
     const lastMessage = chat.messages[chat.messages.length - 1];
     receivers.forEach((receiver) => {
       if (receiver !== userId) {
-        getIO()
-          .to(receiver)
-          .emit("addMessage", { chatId: chatId, message: lastMessage });
+        getIO().to(receiver).emit("addMessage", {
+          chatId: chatId,
+          message: lastMessage,
+        });
       }
     });
 

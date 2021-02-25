@@ -15,14 +15,7 @@ import UserPreview from "../../UI/Users/UserPreview/UserPreview";
 import { HiDotsVertical } from "react-icons/hi";
 import { useAuth } from "../../../context/AuthContext";
 
-const Member = ({
-  user,
-  isAdmin,
-  admins,
-  onAddAdmin,
-  onRemoveAdmin,
-  onRemoveMember,
-}) => {
+const Member = ({ user, isAdmin, admins, onGroupAction }) => {
   const { currentUser } = useAuth();
 
   const isMemberAdmin = admins.some((admin) => admin === user._id);
@@ -31,9 +24,13 @@ const Member = ({
   let adminMenu = null;
   if (!isYourUser && isAdmin) {
     const adminMenuItem = isMemberAdmin ? (
-      <MenuItem onClick={onRemoveAdmin}>Eliminar como Administrador</MenuItem>
+      <MenuItem onClick={() => onGroupAction("REMOVE_ADMIN")}>
+        Eliminar como Administrador
+      </MenuItem>
     ) : (
-      <MenuItem onClick={onAddAdmin}>Hacer Administrador</MenuItem>
+      <MenuItem onClick={() => onGroupAction("ADD_ADMIN")}>
+        Hacer Administrador
+      </MenuItem>
     );
 
     adminMenu = (
@@ -46,7 +43,10 @@ const Member = ({
           />
           <MenuList color="gray.900" shadow="md">
             {adminMenuItem}
-            <MenuItem color="red.700" onClick={onRemoveMember}>
+            <MenuItem
+              color="red.700"
+              onClick={() => onGroupAction("REMOVE_MEMBER")}
+            >
               Eliminar del Grupo
             </MenuItem>
           </MenuList>
