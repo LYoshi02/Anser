@@ -2,6 +2,7 @@ const { validationResult } = require("express-validator");
 
 const Chat = require("../models/Chat");
 const User = require("../models/User");
+const { filterUserMessages } = require("../util/chat");
 const { getIO } = require("../socket");
 
 exports.addMembers = async (req, res, next) => {
@@ -30,6 +31,7 @@ exports.addMembers = async (req, res, next) => {
       throw error;
     }
 
+    const participants = [...chat.users, ...newMembers];
     const prevUsers = [...chat.users];
     const newMembersData = await User.find({
       _id: { $in: [...newMembers] },
@@ -51,19 +53,32 @@ exports.addMembers = async (req, res, next) => {
         sender: senderData,
         text: `@${senderData.username} ha añadido a @${member.username}`,
         global: true,
+        participants,
       });
     });
 
     chat.users.push(...newMembersData);
-    chat.messages.push(...addMembersMessages);
+    const amountMessagesPushed = chat.messages.push(...addMembersMessages);
     await chat.save();
 
+    const chatObj = chat.toObject();
     newMembersData.forEach((member) => {
-      getIO().to(member._id.toString()).emit("newGroupChat", {
-        chat,
-      });
+      const memberId = member._id.toString();
+      const filteredMessages = filterUserMessages(chatObj.messages, memberId);
+
+      getIO()
+        .to(memberId)
+        .emit("newGroupChat", {
+          chat: {
+            ...chatObj,
+            messages: filteredMessages,
+          },
+        });
     });
 
+    const newMessagesPushed = chat.messages.slice(
+      addMembersMessages.length * -1
+    );
     prevUsers.forEach((receiver) => {
       if (receiver._id.toString() !== userId) {
         getIO()
@@ -72,7 +87,7 @@ exports.addMembers = async (req, res, next) => {
             chatId,
             updatedProperties: {
               users: chat.users,
-              messages: chat.messages,
+              messages: newMessagesPushed,
             },
           });
       }
@@ -80,7 +95,7 @@ exports.addMembers = async (req, res, next) => {
 
     res.status(200).json({
       users: chat.users,
-      messages: chat.messages,
+      messages: newMessagesPushed,
     });
   } catch (error) {
     next(error);
@@ -96,16 +111,10 @@ exports.removeMember = async (req, res, next) => {
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $in: [userId] },
-    }).populate([
-      {
-        path: "users",
-        select: "username fullname profileImage.url",
-      },
-      {
-        path: "messages.sender",
-        select: "username fullname profileImage.url",
-      },
-    ]);
+    }).populate({
+      path: "users",
+      select: "username fullname profileImage.url",
+    });
 
     if (!chat || !chat.group) {
       const error = new Error("Chat no encontrado");
@@ -117,18 +126,19 @@ exports.removeMember = async (req, res, next) => {
     const removedMember = chat.users.find(
       (u) => u._id.toString() === userChangedId
     );
-    const removedMemberMessage = {
+    const previousUsers = [...chat.users];
+
+    chat.messages.push({
       sender: senderData,
       text: `@${senderData.username} ha eliminado a @${removedMember.username}`,
       global: true,
-    };
-    const previousUsers = [...chat.users];
-
-    chat.messages.push(removedMemberMessage);
+      participants: chat.users,
+    });
     chat.users.pull(userChangedId);
     chat.group.admins.pull(userChangedId);
     await chat.save();
 
+    const newMessagePushed = chat.messages.slice(-1);
     previousUsers.forEach((receiver) => {
       if (receiver._id.toString() !== userId) {
         getIO()
@@ -137,16 +147,18 @@ exports.removeMember = async (req, res, next) => {
             chatId,
             updatedProperties: {
               users: chat.users,
-              messages: chat.messages,
+              messages: newMessagePushed,
               group: chat.group,
             },
           });
       }
     });
 
-    res
-      .status(200)
-      .json({ users: chat.users, messages: chat.messages, group: chat.group });
+    res.status(200).json({
+      users: chat.users,
+      messages: newMessagePushed,
+      group: chat.group,
+    });
   } catch (error) {
     next(error);
   }
@@ -173,9 +185,10 @@ exports.addAdmin = async (req, res, next) => {
     await chat.save();
 
     chat.users.forEach((receiver) => {
-      if (receiver._id.toString() !== userId) {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
         getIO()
-          .to(receiver._id.toString())
+          .to(receiverId)
           .emit("updateChat", {
             chatId,
             updatedProperties: { group: chat.group },
@@ -210,9 +223,10 @@ exports.removeAdmin = async (req, res, next) => {
     await chat.save();
 
     chat.users.forEach((receiver) => {
-      if (receiver._id.toString() !== userId) {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
         getIO()
-          .to(receiver._id.toString())
+          .to(receiverId)
           .emit("updateChat", {
             chatId,
             updatedProperties: { group: chat.group },
@@ -241,16 +255,10 @@ exports.leaveGroup = async (req, res, next) => {
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $in: [userId] },
-    }).populate([
-      {
-        path: "users",
-        select: "username fullname profileImage.url",
-      },
-      {
-        path: "messages.sender",
-        select: "username fullname profileImage.url",
-      },
-    ]);
+    }).populate({
+      path: "users",
+      select: "username fullname profileImage.url",
+    });
 
     if (!chat || !chat.group) {
       const error = new Error("Chat no encontrado");
@@ -263,30 +271,34 @@ exports.leaveGroup = async (req, res, next) => {
       sender: senderData,
       text: `@${senderData.username} abandonó el grupo`,
       global: true,
+      participants: chat.users,
     });
-
     chat.users.pull(userId);
     chat.group.admins.pull(userId);
     await chat.save();
 
+    const newMessagePushed = chat.messages.slice(-1);
     chat.users.forEach((receiver) => {
-      if (receiver._id.toString() !== userId) {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
         getIO()
-          .to(receiver._id.toString())
+          .to(receiverId)
           .emit("updateChat", {
             chatId,
             updatedProperties: {
               users: chat.users,
               group: chat.group,
-              messages: chat.messages,
+              messages: newMessagePushed,
             },
           });
       }
     });
 
-    res
-      .status(200)
-      .json({ users: chat.users, group: chat.group, messages: chat.messages });
+    res.status(200).json({
+      users: chat.users,
+      group: chat.group,
+      messages: newMessagePushed,
+    });
   } catch (error) {
     next(error);
   }

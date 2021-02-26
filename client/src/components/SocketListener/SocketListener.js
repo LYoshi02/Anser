@@ -60,9 +60,15 @@ const SocketListener = ({ children }) => {
       setChats((prevChats) =>
         prevChats.map((chat) => {
           if (chat._id === chatId) {
+            const messages = [...chat.messages];
+            if (updatedProperties.messages) {
+              messages.push(...updatedProperties.messages);
+            }
+
             return {
               ...chat,
               ...updatedProperties,
+              messages,
             };
           }
           return chat;

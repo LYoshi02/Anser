@@ -32,6 +32,8 @@ const GroupInfo = (props) => {
     selectedUsersAtom
   );
 
+  console.log(currentChat);
+
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
     setActiveChatId(chatIdParam);
@@ -56,6 +58,8 @@ const GroupInfo = (props) => {
       url += "/remove-admin";
     } else if (actionName === "REMOVE_MEMBER") {
       url += "/remove-member";
+    } else {
+      return;
     }
 
     axios
@@ -102,7 +106,15 @@ const GroupInfo = (props) => {
   };
 
   const updatedCurrentChat = (updatedProperties) => {
-    const currentChatUpdated = { ...currentChat, ...updatedProperties };
+    const updatedMessages = [...currentChat.messages];
+    if (updatedProperties.messages) {
+      updatedMessages.push(...updatedProperties.messages);
+    }
+    const currentChatUpdated = {
+      ...currentChat,
+      ...updatedProperties,
+      messages: updatedMessages,
+    };
     setCurrentChat(currentChatUpdated);
   };
 

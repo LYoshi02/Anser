@@ -20,6 +20,7 @@ exports.createNewChat = async (req, res, next) => {
         messages: [
           {
             sender: senderData,
+            participants: chatUsersIds,
             text: `@${senderData.username} ha creado el grupo`,
             global: true,
           },
@@ -36,6 +37,7 @@ exports.createNewChat = async (req, res, next) => {
         messages: [
           {
             sender: senderData,
+            participants: chatUsersIds,
             text: text,
           },
         ],
@@ -71,9 +73,10 @@ exports.addMessage = async (req, res, next) => {
   const { receivers, text, chatId } = req.body.chatData;
 
   try {
+    const participants = [userId, ...receivers];
     const chat = await Chat.findOne({
       _id: chatId,
-      users: { $all: [userId, ...receivers] },
+      users: { $all: participants },
     });
 
     if (!chat) {
@@ -87,6 +90,7 @@ exports.addMessage = async (req, res, next) => {
     );
     const newMessage = {
       sender: senderData,
+      participants,
       text,
     };
     chat.messages.push(newMessage);

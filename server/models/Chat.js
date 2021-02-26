@@ -16,6 +16,13 @@ const ChatSchema = new Schema(
           ref: "User",
           required: true,
         },
+        participants: [
+          {
+            type: Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+          },
+        ],
         text: {
           type: String,
           required: true,
