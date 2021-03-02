@@ -103,7 +103,7 @@ const Profile = () => {
             <Avatar
               name={currentUser.fullname}
               size="2xl"
-              src={currentUser.profileImage.url}
+              src={currentUser?.profileImage?.url}
             ></Avatar>
             <Link to="/profile/image">
               <IconButton
