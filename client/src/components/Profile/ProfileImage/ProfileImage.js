@@ -19,7 +19,7 @@ const ProfileImage = () => {
 
   useEffect(() => {
     if (currentUser.profileImage) {
-      setImage(currentUser.profileImage);
+      setImage(currentUser.profileImage.url);
     }
   }, [currentUser]);
 
@@ -40,7 +40,7 @@ const ProfileImage = () => {
         setReqLoading(false);
         toast({
           title: "Imagen Eliminada",
-          description: "Tu imagen se eliminió correctamente.",
+          description: "Tu imagen se eliminó correctamente.",
           status: "success",
           isClosable: true,
         });
@@ -62,11 +62,13 @@ const ProfileImage = () => {
       const croppedImage = await getCroppedImg(image, croppedArea);
       const blob = await fetch(croppedImage).then((r) => r.blob());
       const formData = new FormData();
-      formData.append("profileImg", blob);
+      formData.append("image", blob);
 
       const res = await axios.post("profile/image", formData, {
         headers: { authorization: "Bearer " + token },
       });
+
+      console.log(res);
       updateCurrentUser({ profileImage: res.data.profileImage });
       setReqLoading(false);
       toast({

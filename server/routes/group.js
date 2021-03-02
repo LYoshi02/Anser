@@ -3,6 +3,7 @@ const { param } = require("express-validator");
 
 const Chat = require("../models/Chat");
 const isAuth = require("../middleware/is-auth");
+const uploadImageToCloud = require("../middleware/upload-image");
 const isAdmin = require("../middleware/is-admin");
 const groupController = require("../controllers/group");
 
@@ -54,5 +55,14 @@ router.post(
   }),
   groupController.leaveGroup
 );
+
+router.post(
+  "/:chatId/image",
+  isAuth,
+  uploadImageToCloud,
+  groupController.setImage
+);
+
+router.delete("/:chatId/image", isAuth, groupController.deleteImage);
 
 module.exports = router;

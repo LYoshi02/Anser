@@ -50,6 +50,14 @@ const ChatSchema = new Schema(
         ],
         default: undefined,
       },
+      image: {
+        filename: {
+          type: String,
+        },
+        url: {
+          type: String,
+        },
+      },
     },
   },
   { timestamps: true }

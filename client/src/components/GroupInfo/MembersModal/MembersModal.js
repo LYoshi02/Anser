@@ -18,6 +18,7 @@ const MembersModal = ({
   onSelectMember,
   selectedMembers,
   onAddMembers,
+  reqLoading,
 }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose} isCentered>
@@ -36,6 +37,7 @@ const MembersModal = ({
           <Button
             colorScheme="purple"
             isDisabled={selectedMembers.length === 0}
+            isLoading={reqLoading}
             onClick={onAddMembers}
           >
             Añadir

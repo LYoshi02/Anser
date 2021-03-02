@@ -34,7 +34,7 @@ const Member = ({ user, isAdmin, admins, onGroupAction }) => {
     );
 
     adminMenu = (
-      <Box>
+      <Box ml="2">
         <Menu autoSelect={false}>
           <MenuButton
             as={IconButton}
@@ -59,19 +59,21 @@ const Member = ({ user, isAdmin, admins, onGroupAction }) => {
     <Flex
       py="4"
       px="2"
-      _hover={{ bgColor: "gray.100" }}
+      _hover={{ bgColor: "gray.50" }}
       transition="ease-out"
       transitionDuration=".3s"
       justify="space-between"
       align="center"
     >
       <UserPreview userData={user} />
-      {isMemberAdmin && (
-        <Badge colorScheme="purple" variant="subtle">
-          Admin
-        </Badge>
-      )}
-      {adminMenu}
+      <Flex align="center">
+        {isMemberAdmin && (
+          <Badge colorScheme="purple" variant="subtle">
+            Admin
+          </Badge>
+        )}
+        {adminMenu}
+      </Flex>
     </Flex>
   );
 };

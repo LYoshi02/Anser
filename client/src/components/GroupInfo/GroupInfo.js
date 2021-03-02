@@ -1,14 +1,4 @@
-import {
-  Box,
-  Button,
-  Container,
-  Divider,
-  Editable,
-  EditableInput,
-  EditablePreview,
-  Flex,
-  Text,
-} from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
@@ -17,12 +7,15 @@ import { useAuth } from "../../context/AuthContext";
 import { activeChatIdAtom, selectedUsersAtom } from "../../recoil/atoms";
 import { currentGroupChatSelector } from "../../recoil/selectors";
 import BackNav from "../UI/BackNav/BackNav";
-import Member from "./Member/Member";
+import Info from "./Info/Info";
+import ImageModal from "./ImageModal/ImageModal";
 import MembersModal from "./MembersModal/MembersModal";
 
 const GroupInfo = (props) => {
   const [membersModalOpen, setMembersModalOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [reqLoading, setReqLoading] = useState(false);
   const { token, currentUser } = useAuth();
   const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdAtom);
   const [currentChat, setCurrentChat] = useRecoilState(
@@ -31,8 +24,6 @@ const GroupInfo = (props) => {
   const [selectedMembers, setSelectedMembers] = useRecoilState(
     selectedUsersAtom
   );
-
-  console.log(currentChat);
 
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
@@ -48,7 +39,7 @@ const GroupInfo = (props) => {
     }
   }, [currentChat, currentUser.userId]);
 
-  const groupAction = (actionName, userChangedId) => {
+  const changeMembers = (actionName, userChangedId) => {
     if (!activeChatId || !actionName || !userChangedId) return;
 
     let url = `group/${activeChatId}`;
@@ -71,7 +62,7 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        updatedCurrentChat(res.data);
+        updateCurrentChat(res.data);
       })
       .catch((error) => {
         console.log(error);
@@ -85,6 +76,7 @@ const GroupInfo = (props) => {
       ...new Set(selectedMembers.map((user) => user._id)),
     ];
 
+    setReqLoading(true);
     axios
       .post(
         `group/${activeChatId}/add-members`,
@@ -96,16 +88,18 @@ const GroupInfo = (props) => {
         }
       )
       .then((res) => {
-        updatedCurrentChat(res.data);
+        updateCurrentChat(res.data);
         setMembersModalOpen(false);
+        setReqLoading(false);
       })
       .catch((error) => {
         console.log(error);
         setMembersModalOpen(false);
+        setReqLoading(false);
       });
   };
 
-  const updatedCurrentChat = (updatedProperties) => {
+  const updateCurrentChat = (updatedProperties) => {
     const updatedMessages = [...currentChat.messages];
     if (updatedProperties.messages) {
       updatedMessages.push(...updatedProperties.messages);
@@ -133,61 +127,41 @@ const GroupInfo = (props) => {
     });
   };
 
-  const toggleModal = () => {
+  const toggleMembersModal = () => {
     setSelectedMembers([]);
     setMembersModalOpen((prevState) => !prevState);
   };
 
-  let groupMembers = null;
-  if (currentChat) {
-    groupMembers = currentChat.users.map((user) => (
-      <Member
-        key={user._id}
-        user={user}
-        isAdmin={isAdmin}
-        admins={currentChat.group.admins}
-        onGroupAction={(action) => groupAction(action, user._id)}
-      />
-    ));
-  }
+  const toggleImageModal = () => {
+    setImageModalOpen((prevState) => !prevState);
+  };
+
+  console.log(currentChat);
 
   return (
     <Flex h="full" direction="column" maxH="100%">
       <BackNav />
-      <Container my="4">
-        <Box>
-          <Text>Nombre del grupo:</Text>
-          <Editable defaultValue="name">
-            <EditablePreview />
-            <EditableInput />
-          </Editable>
-        </Box>
-        <Divider my="2" />
-        <Box>
-          <Flex justify="space-between" align="center">
-            <Text fontWeight="bold" fontSize="lg">
-              Miembros
-            </Text>
-            {isAdmin && (
-              <Button
-                colorScheme="purple"
-                variant="ghost"
-                onClick={toggleModal}
-              >
-                Añadir Miembros
-              </Button>
-            )}
-          </Flex>
-          <Box mt="2">{groupMembers}</Box>
-        </Box>
-      </Container>
+      <Info
+        isAdmin={isAdmin}
+        currentChat={currentChat}
+        onChangeMembers={changeMembers}
+        onToggleMembersModal={toggleMembersModal}
+        onToggleImageModal={toggleImageModal}
+      />
       <MembersModal
         isOpen={membersModalOpen}
-        onClose={toggleModal}
+        onClose={toggleMembersModal}
         groupUsers={currentChat && currentChat.users}
         onSelectMember={selectMember}
         selectedMembers={selectedMembers}
         onAddMembers={addMembersToGroup}
+        reqLoading={reqLoading}
+      />
+      <ImageModal
+        isOpen={imageModalOpen}
+        onCloseModal={toggleImageModal}
+        onUpdateChat={updateCurrentChat}
+        currentChat={currentChat}
       />
     </Flex>
   );

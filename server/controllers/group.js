@@ -3,6 +3,7 @@ const { validationResult } = require("express-validator");
 const Chat = require("../models/Chat");
 const User = require("../models/User");
 const { filterUserMessages } = require("../util/chat");
+const { deleteBucketFile } = require("../util/file");
 const { getIO } = require("../socket");
 
 exports.addMembers = async (req, res, next) => {
@@ -58,7 +59,7 @@ exports.addMembers = async (req, res, next) => {
     });
 
     chat.users.push(...newMembersData);
-    const amountMessagesPushed = chat.messages.push(...addMembersMessages);
+    chat.messages.push(...addMembersMessages);
     await chat.save();
 
     const chatObj = chat.toObject();
@@ -299,6 +300,83 @@ exports.leaveGroup = async (req, res, next) => {
       group: chat.group,
       messages: newMessagePushed,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.setImage = async (req, res, next) => {
+  const userId = req.userId;
+  const chatId = req.params.chatId;
+
+  try {
+    const chat = await Chat.findOne({ _id: chatId, users: { $in: userId } });
+
+    if (!chat || !chat.group) {
+      const error = new Error("Chat no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (chat.group.image.filename) {
+      await deleteBucketFile(chat.group.image.filename);
+    }
+
+    const { filename, url } = req.image;
+    chat.group.image = { filename, url };
+    await chat.save();
+
+    chat.users.forEach((receiver) => {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
+        getIO()
+          .to(receiverId)
+          .emit("updateChat", {
+            chatId,
+            updatedProperties: { group: chat.group },
+          });
+      }
+    });
+
+    res.status(200).json({ group: chat.group });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.deleteImage = async (req, res, next) => {
+  const userId = req.userId;
+  const chatId = req.params.chatId;
+
+  try {
+    const chat = await Chat.findOne({ _id: chatId, users: { $in: userId } });
+
+    if (!chat || !chat.group) {
+      const error = new Error("Chat no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    if (chat.group.image.filename) {
+      await deleteBucketFile(chat.group.image.filename);
+    }
+
+    chat.group.image = null;
+    await chat.save();
+
+    chat.users.forEach((receiver) => {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
+        getIO()
+          .to(receiverId)
+          .emit("updateChat", {
+            chatId,
+            updatedProperties: { group: chat.group },
+          });
+      }
+    });
+
+    res.status(200).json({ group: chat.group });
   } catch (error) {
     next(error);
   }

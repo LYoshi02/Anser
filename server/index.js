@@ -3,6 +3,8 @@ const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
+const multer = require("multer");
+const { v4: uuid } = require("uuid");
 
 const authRoutes = require("./routes/auth");
 const chatsRoutes = require("./routes/chats");
@@ -14,8 +16,37 @@ const PORT = process.env.PORT || 8080;
 
 const app = express();
 
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "upload");
+  },
+  filename: (req, file, cb) => {
+    cb(null, uuid());
+  },
+});
+const fileFilter = (req, file, cb) => {
+  if (
+    file.mimetype === "image/jpg" ||
+    file.mimetype === "image/jpeg" ||
+    file.mimetype === "image/png"
+  ) {
+    return cb(null, true);
+  }
+
+  return cb(null, false);
+};
+
 app.use(cors());
 app.use(express.json());
+app.use(
+  multer({
+    storage: fileStorage,
+    fileFilter: fileFilter,
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5 Megabytes
+    },
+  }).single("image")
+);
 app.use("/upload", express.static(path.join(__dirname, "upload")));
 
 app.use("/auth", authRoutes);
