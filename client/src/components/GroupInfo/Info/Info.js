@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Avatar,
   Box,
@@ -10,9 +10,10 @@ import {
   EditablePreview,
   Flex,
   Icon,
+  IconButton,
   Text,
 } from "@chakra-ui/react";
-import { HiUserGroup } from "react-icons/hi";
+import { HiUserGroup, HiPencilAlt, HiCheck } from "react-icons/hi";
 
 import Member from "../Member/Member";
 
@@ -22,7 +23,39 @@ const Info = ({
   onChangeMembers,
   onToggleMembersModal,
   onToggleImageModal,
+  onChangeGroupName,
 }) => {
+  const [groupName, setGroupName] = useState("");
+
+  useEffect(() => {
+    setGroupName(currentChat?.group.name);
+  }, [currentChat]);
+
+  const changeName = () => {
+    const currentName = currentChat?.group.name;
+    if (groupName.trim().length < 3 || groupName === currentName) {
+      return setGroupName(currentName);
+    }
+
+    onChangeGroupName(groupName);
+  };
+
+  function EditableControls({ isEditing, onSubmit, onEdit }) {
+    return isEditing ? (
+      <IconButton
+        icon={<Icon as={HiCheck} w={4} h={4} />}
+        onClick={onSubmit}
+        ml="2"
+      />
+    ) : (
+      <IconButton
+        icon={<Icon as={HiPencilAlt} w={4} h={4} />}
+        onClick={onEdit}
+        ml="2"
+      />
+    );
+  }
+
   let groupMembers = null;
   if (currentChat) {
     groupMembers = currentChat.users.map((user) => (
@@ -43,11 +76,7 @@ const Info = ({
           size="sm"
           bg="gray.200"
           icon={<Icon as={HiUserGroup} w={20} h={20} color="gray.500" />}
-          src={
-            currentChat &&
-            currentChat.group.image &&
-            currentChat.group.image.url
-          }
+          src={currentChat?.group?.image?.url}
           alignSelf="center"
           mb="2"
           h="36"
@@ -55,17 +84,35 @@ const Info = ({
           cursor="pointer"
           onClick={onToggleImageModal}
         />
-        <Text>Nombre del grupo:</Text>
-        <Editable defaultValue="name">
-          <EditablePreview />
-          <EditableInput />
-        </Editable>
+        <Box mt="4">
+          <Text mb="1" fontWeight="bold" fontSize="lg">
+            Nombre del grupo
+          </Text>
+          <Editable
+            value={groupName}
+            onChange={(value) => setGroupName(value)}
+            isPreviewFocusable={false}
+            submitOnBlur={false}
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+            onSubmit={changeName}
+          >
+            {(props) => (
+              <>
+                <EditablePreview />
+                <EditableInput />
+                <EditableControls {...props} />
+              </>
+            )}
+          </Editable>
+        </Box>
       </Flex>
-      <Divider my="2" />
+      <Divider my="4" />
       <Box>
         <Flex justify="space-between" align="center">
           <Text fontWeight="bold" fontSize="lg">
-            Miembros
+            Miembros {`(${groupMembers?.length || 0})`}
           </Text>
           {isAdmin && (
             <Button

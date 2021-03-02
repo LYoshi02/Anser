@@ -41,13 +41,14 @@ const SocketListener = ({ children }) => {
       });
     });
 
-    socket.on("addMessage", ({ chatId, message }) => {
+    socket.on("addMessage", ({ chatId, message, updatedAt }) => {
       setChats((prevChats) =>
         prevChats.map((chat) => {
           if (chat._id === chatId) {
             return {
               ...chat,
               messages: [...chat.messages, message],
+              updatedAt,
               newMessage: true,
             };
           }

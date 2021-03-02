@@ -1,5 +1,5 @@
 const express = require("express");
-const { param } = require("express-validator");
+const { param, body } = require("express-validator");
 
 const Chat = require("../models/Chat");
 const isAuth = require("../middleware/is-auth");
@@ -13,6 +13,13 @@ router.post(
   "/:chatId/add-members",
   isAuth,
   isAdmin,
+  body("newMembers").custom((value) => {
+    if (!Array.isArray(value) || !value.length) {
+      throw new Error("La lista de miembros a añadir se encuentra vacía.");
+    }
+
+    return true;
+  }),
   groupController.addMembers
 );
 
@@ -64,5 +71,15 @@ router.post(
 );
 
 router.delete("/:chatId/image", isAuth, groupController.deleteImage);
+
+router.post(
+  "/:chatId/name",
+  isAuth,
+  body("name")
+    .trim()
+    .isLength({ min: 3, max: 30 })
+    .withMessage("El nombre debe tener entre 3 y 30 caracteres"),
+  groupController.changeName
+);
 
 module.exports = router;

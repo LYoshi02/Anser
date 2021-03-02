@@ -1,4 +1,4 @@
-import { Flex } from "@chakra-ui/react";
+import { Flex, useToast } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
@@ -24,6 +24,7 @@ const GroupInfo = (props) => {
   const [selectedMembers, setSelectedMembers] = useRecoilState(
     selectedUsersAtom
   );
+  const toast = useToast();
 
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
@@ -65,7 +66,10 @@ const GroupInfo = (props) => {
         updateCurrentChat(res.data);
       })
       .catch((error) => {
-        console.log(error);
+        const message = error.response
+          ? error.response.data.message
+          : error.message;
+        showToastError(message);
       });
   };
 
@@ -80,9 +84,7 @@ const GroupInfo = (props) => {
     axios
       .post(
         `group/${activeChatId}/add-members`,
-        {
-          newMembers: selectedMembersIds,
-        },
+        { newMembers: selectedMembersIds },
         {
           headers: { authorization: "Bearer " + token },
         }
@@ -93,10 +95,43 @@ const GroupInfo = (props) => {
         setReqLoading(false);
       })
       .catch((error) => {
-        console.log(error);
+        const message = error.response
+          ? error.response.data.message
+          : error.message;
         setMembersModalOpen(false);
         setReqLoading(false);
+        showToastError(message);
       });
+  };
+
+  const changeGroupName = (newName) => {
+    axios
+      .post(
+        `group/${activeChatId}/name`,
+        { name: newName },
+        {
+          headers: { authorization: "Bearer " + token },
+        }
+      )
+      .then((res) => {
+        console.log(res);
+        updateCurrentChat(res.data);
+      })
+      .catch((error) => {
+        const message = error.response
+          ? error.response.data.message
+          : error.message;
+        showToastError(message);
+      });
+  };
+
+  const showToastError = (message) => {
+    toast({
+      title: "Error!",
+      description: message,
+      status: "error",
+      isClosable: true,
+    });
   };
 
   const updateCurrentChat = (updatedProperties) => {
@@ -136,8 +171,6 @@ const GroupInfo = (props) => {
     setImageModalOpen((prevState) => !prevState);
   };
 
-  console.log(currentChat);
-
   return (
     <Flex h="full" direction="column" maxH="100%">
       <BackNav />
@@ -147,6 +180,7 @@ const GroupInfo = (props) => {
         onChangeMembers={changeMembers}
         onToggleMembersModal={toggleMembersModal}
         onToggleImageModal={toggleImageModal}
+        onChangeGroupName={changeGroupName}
       />
       <MembersModal
         isOpen={membersModalOpen}

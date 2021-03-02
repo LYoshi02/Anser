@@ -71,6 +71,7 @@ const SingleChat = (props) => {
         if (currentChat) {
           updatedChat = {
             ...currentChat,
+            updatedAt: res.data.updatedAt,
             messages: [...currentChat.messages, res.data.message],
           };
         } else {

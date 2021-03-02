@@ -72,6 +72,7 @@ const GroupChat = (props) => {
         console.log(res);
         const updatedChat = {
           ...currentChat,
+          updatedAt: res.data.updatedAt,
           messages: [...currentChat.messages, res.data.message],
         };
         setCurrentChat(updatedChat);
@@ -91,7 +92,15 @@ const GroupChat = (props) => {
         }
       )
       .then((res) => {
-        const currentChatUpdated = { ...currentChat, ...res.data };
+        const updatedMessages = [...currentChat.messages];
+        if (res.data.messages) {
+          updatedMessages.push(...res.data.messages);
+        }
+        const currentChatUpdated = {
+          ...currentChat,
+          ...res.data,
+          messages: updatedMessages,
+        };
         setCurrentChat(currentChatUpdated);
       })
       .catch((error) => {

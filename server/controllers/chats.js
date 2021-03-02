@@ -102,11 +102,12 @@ exports.addMessage = async (req, res, next) => {
         getIO().to(receiver).emit("addMessage", {
           chatId: chatId,
           message: lastMessage,
+          updatedAt: chat.updatedAt,
         });
       }
     });
 
-    res.status(200).json({ message: lastMessage });
+    res.status(200).json({ message: lastMessage, updatedAt: chat.updatedAt });
   } catch (error) {
     next(error);
   }

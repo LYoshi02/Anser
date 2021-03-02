@@ -7,11 +7,18 @@ const { deleteBucketFile } = require("../util/file");
 const { getIO } = require("../socket");
 
 exports.addMembers = async (req, res, next) => {
-  const userId = req.userId;
-  const chatId = req.params.chatId;
-  const { newMembers } = req.body;
+  const errors = validationResult(req);
 
   try {
+    if (!errors.isEmpty()) {
+      const error = new Error(errors.array()[0].msg);
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const userId = req.userId;
+    const chatId = req.params.chatId;
+    const { newMembers } = req.body;
     const chat = await Chat.findOne({
       _id: chatId,
       users: { $in: [userId] },
@@ -26,7 +33,7 @@ exports.addMembers = async (req, res, next) => {
       },
     ]);
 
-    if (!chat) {
+    if (!chat || !chat.group) {
       const error = new Error("Chat no encontrado");
       error.statusCode = 404;
       throw error;
@@ -52,7 +59,7 @@ exports.addMembers = async (req, res, next) => {
     newMembersData.forEach((member) => {
       addMembersMessages.push({
         sender: senderData,
-        text: `@${senderData.username} ha añadido a @${member.username}`,
+        text: `@${senderData.username} añadió a @${member.username}`,
         global: true,
         participants,
       });
@@ -73,6 +80,7 @@ exports.addMembers = async (req, res, next) => {
           chat: {
             ...chatObj,
             messages: filteredMessages,
+            updatedAt: chat.updatedAt,
           },
         });
     });
@@ -89,6 +97,7 @@ exports.addMembers = async (req, res, next) => {
             updatedProperties: {
               users: chat.users,
               messages: newMessagesPushed,
+              updatedAt: chat.updatedAt,
             },
           });
       }
@@ -97,6 +106,7 @@ exports.addMembers = async (req, res, next) => {
     res.status(200).json({
       users: chat.users,
       messages: newMessagesPushed,
+      updatedAt: chat.updatedAt,
     });
   } catch (error) {
     next(error);
@@ -131,7 +141,7 @@ exports.removeMember = async (req, res, next) => {
 
     chat.messages.push({
       sender: senderData,
-      text: `@${senderData.username} ha eliminado a @${removedMember.username}`,
+      text: `@${senderData.username} eliminó a @${removedMember.username}`,
       global: true,
       participants: chat.users,
     });
@@ -150,6 +160,7 @@ exports.removeMember = async (req, res, next) => {
               users: chat.users,
               messages: newMessagePushed,
               group: chat.group,
+              updatedAt: chat.updatedAt,
             },
           });
       }
@@ -159,6 +170,7 @@ exports.removeMember = async (req, res, next) => {
       users: chat.users,
       messages: newMessagePushed,
       group: chat.group,
+      updatedAt: chat.updatedAt,
     });
   } catch (error) {
     next(error);
@@ -290,6 +302,7 @@ exports.leaveGroup = async (req, res, next) => {
               users: chat.users,
               group: chat.group,
               messages: newMessagePushed,
+              updatedAt: chat.updatedAt,
             },
           });
       }
@@ -299,6 +312,7 @@ exports.leaveGroup = async (req, res, next) => {
       users: chat.users,
       group: chat.group,
       messages: newMessagePushed,
+      updatedAt: chat.updatedAt,
     });
   } catch (error) {
     next(error);
@@ -362,6 +376,47 @@ exports.deleteImage = async (req, res, next) => {
     }
 
     chat.group.image = null;
+    await chat.save();
+
+    chat.users.forEach((receiver) => {
+      const receiverId = receiver._id.toString();
+      if (receiverId !== userId) {
+        getIO()
+          .to(receiverId)
+          .emit("updateChat", {
+            chatId,
+            updatedProperties: { group: chat.group },
+          });
+      }
+    });
+
+    res.status(200).json({ group: chat.group });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.changeName = async (req, res, next) => {
+  const errors = validationResult(req);
+
+  try {
+    if (!errors.isEmpty()) {
+      const error = new Error(errors.array()[0].msg);
+      error.statusCode = 422;
+      throw error;
+    }
+
+    const userId = req.userId;
+    const chatId = req.params.chatId;
+    const chat = await Chat.findOne({ _id: chatId, users: { $in: userId } });
+
+    if (!chat || !chat.group) {
+      const error = new Error("Chat no encontrado");
+      error.statusCode = 404;
+      throw error;
+    }
+
+    chat.group.name = req.body.name;
     await chat.save();
 
     chat.users.forEach((receiver) => {

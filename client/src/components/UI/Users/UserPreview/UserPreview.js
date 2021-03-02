@@ -2,15 +2,10 @@ import React from "react";
 import { Avatar, Badge, Box, Flex, Text } from "@chakra-ui/react";
 
 const UserPreview = ({
-  userData: { username, fullname, newUser, profileImage, _id },
+  userData: { username, fullname, newUser, profileImage },
 }) => (
   <Flex align="center">
-    <Avatar
-      src={profileImage && profileImage.url}
-      size="lg"
-      name={fullname}
-      mr="4"
-    ></Avatar>
+    <Avatar src={profileImage?.url} size="lg" name={fullname} mr="4"></Avatar>
     <Box>
       <Text fontWeight="bold" fontSize="xl">
         {fullname}
