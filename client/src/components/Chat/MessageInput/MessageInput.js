@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { Box, Flex, IconButton, Input, Text } from "@chakra-ui/react";
+import {
+  Box,
+  Flex,
+  IconButton,
+  Input,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { HiPaperAirplane } from "react-icons/hi";
 
 const MessageInput = ({ onSendMessage, isMember }) => {
@@ -10,8 +17,10 @@ const MessageInput = ({ onSendMessage, isMember }) => {
     setText("");
   };
 
+  const colorGray = useColorModeValue("gray.300", "gray.700");
+
   let elementContent = (
-    <Flex>
+    <Flex p="2">
       <Input
         placeholder="Escribe tu mensaje..."
         mr="2"
@@ -31,7 +40,7 @@ const MessageInput = ({ onSendMessage, isMember }) => {
   );
   if (!isMember) {
     elementContent = (
-      <Box textAlign="center" bgColor="gray.200" py="1">
+      <Box textAlign="center" bgColor={colorGray} p="1">
         <Text fontSize="lg">Ya no perteneces a este grupo</Text>
       </Box>
     );

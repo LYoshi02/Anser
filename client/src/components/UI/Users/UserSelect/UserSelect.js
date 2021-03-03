@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Checkbox, Flex } from "@chakra-ui/react";
+import { Checkbox } from "@chakra-ui/react";
 import { useRecoilValue } from "recoil";
 
 import { selectedUsersAtom } from "../../../../recoil/atoms";
@@ -20,20 +20,9 @@ const UserSelect = ({ onSelectUser, userData }) => {
   };
 
   return (
-    <Flex
-      align="center"
-      justify="space-between"
-      py="4"
-      px="2"
-      _hover={{ bgColor: "gray.100" }}
-      transition="ease-out"
-      transitionDuration=".3s"
-      cursor="pointer"
-      onClick={selectUser}
-    >
-      <UserPreview userData={userData} />
+    <UserPreview userData={userData} clicked={selectUser}>
       <Checkbox isChecked={userSelected} size="lg" colorScheme="yellow" />
-    </Flex>
+    </UserPreview>
   );
 };
 

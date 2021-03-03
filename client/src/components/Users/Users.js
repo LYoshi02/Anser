@@ -60,15 +60,7 @@ const Users = ({ selection, onSelectUser, selectedUsers }) => {
       } else {
         element = (
           <Link to={`/users/${user.username}`} key={user._id}>
-            <Box
-              py="4"
-              px="2"
-              _hover={{ bgColor: "gray.100" }}
-              transition="ease-out"
-              transitionDuration=".3s"
-            >
-              <UserPreview userData={user} />
-            </Box>
+            <UserPreview userData={user} />
           </Link>
         );
       }

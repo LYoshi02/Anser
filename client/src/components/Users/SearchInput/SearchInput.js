@@ -40,6 +40,7 @@ const SearchInput = ({ onSearchUser }) => {
           <InputRightElement
             children={<HiX />}
             cursor="pointer"
+            zIndex="0"
             onClick={() => setSearch("")}
           />
         )}

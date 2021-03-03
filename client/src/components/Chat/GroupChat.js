@@ -136,12 +136,13 @@ const GroupChat = (props) => {
       </BackNav>
       <Flex
         direction="column"
-        p="2"
         justify="space-between"
         grow="1"
         overflow="hidden"
       >
-        <Box overflow="auto">{messages}</Box>
+        <Box overflow="auto" p="2">
+          {messages}
+        </Box>
         <MessageInput onSendMessage={sendMessage} isMember={isMember} />
       </Flex>
     </Flex>

@@ -12,6 +12,7 @@ import {
   Icon,
   IconButton,
   Text,
+  useColorModeValue,
 } from "@chakra-ui/react";
 import { HiUserGroup, HiPencilAlt, HiCheck } from "react-icons/hi";
 
@@ -69,13 +70,16 @@ const Info = ({
     ));
   }
 
+  const groupBgColor = useColorModeValue("gray.300", "gray.500");
+  const groupIconColor = useColorModeValue("white", "gray.200");
+
   return (
     <Container my="4">
       <Flex direction="column">
         <Avatar
           size="sm"
-          bg="gray.200"
-          icon={<Icon as={HiUserGroup} w={20} h={20} color="gray.500" />}
+          bg={groupBgColor}
+          icon={<Icon as={HiUserGroup} w={20} h={20} color={groupIconColor} />}
           src={currentChat?.group?.image?.url}
           alignSelf="center"
           mb="2"

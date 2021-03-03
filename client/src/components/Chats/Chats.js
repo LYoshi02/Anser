@@ -1,7 +1,14 @@
 import React from "react";
 import { HiUserGroup } from "react-icons/hi";
 import { useRecoilValue } from "recoil";
-import { Avatar, Box, Flex, Icon, Text } from "@chakra-ui/react";
+import {
+  Avatar,
+  Box,
+  Flex,
+  Icon,
+  Text,
+  useColorModeValue,
+} from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 
 import { chatsAtom } from "../../recoil/atoms";
@@ -13,7 +20,11 @@ const Chats = () => {
   const { currentUser } = useAuth();
 
   const orderedChats = orderChatsByDate(chats);
-  console.log(chats);
+
+  const groupBgColor = useColorModeValue("gray.300", "gray.500");
+  const groupIconColor = useColorModeValue("white", "gray.200");
+  const userHoverColor = useColorModeValue("gray.100", "gray.700");
+
   return (
     <Box>
       {orderedChats.map((chat) => {
@@ -23,8 +34,8 @@ const Chats = () => {
 
         if (chat.group) {
           avatarProps = {
-            bg: "gray.200",
-            icon: <Icon as={HiUserGroup} w={8} h={8} color="gray.500" />,
+            bg: groupBgColor,
+            icon: <Icon as={HiUserGroup} w={8} h={8} color={groupIconColor} />,
             src: chat.group.image && chat.group.image.url,
           };
           chatName = chat.group.name;
@@ -48,7 +59,7 @@ const Chats = () => {
               align="center"
               px="2"
               py="4"
-              _hover={{ bgColor: "gray.100" }}
+              _hover={{ bgColor: userHoverColor }}
               transition="ease-out"
               transitionDuration=".3s"
             >

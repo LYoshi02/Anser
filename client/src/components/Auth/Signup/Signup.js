@@ -8,7 +8,6 @@ import {
   Input,
   Button,
   Box,
-  Icon,
   Container,
   Text,
   Link,
@@ -17,18 +16,20 @@ import {
   InputRightElement,
   InputGroup,
   IconButton,
+  useColorModeValue,
 } from "@chakra-ui/react";
-import { HiChevronLeft, HiEye, HiEyeOff } from "react-icons/hi";
-import { useHistory, Link as RouterLink } from "react-router-dom";
+import { HiEye, HiEyeOff } from "react-icons/hi";
+import { Link as RouterLink } from "react-router-dom";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 
 import { useAuth } from "../../../context/AuthContext";
+import BackNav from "../../UI/BackNav/BackNav";
+import ThemeIcon from "../../UI/ThemeIcon/ThemeIcon";
 
 const Signup = () => {
   const [reqLoading, setReqLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const history = useHistory();
   const toast = useToast();
   const { signup } = useAuth();
   const formik = useFormik({
@@ -74,26 +75,30 @@ const Signup = () => {
     },
   });
 
+  const flexBgColor = useColorModeValue("gray.100", "");
+  const containerBgColor = useColorModeValue("gray.50", "gray.900");
+
   return (
     <Flex minH="100vh" direction="column">
-      <Flex h="12" bg="purple.800" align="center">
-        <Icon
-          as={HiChevronLeft}
-          w="10"
-          h="10"
-          color="white"
-          onClick={() => history.push("/")}
+      <BackNav>
+        <Flex
+          w="full"
+          justify="flex-end"
+          mr="2"
           cursor="pointer"
-        />
-      </Flex>
-      <Flex grow="1" py="4" px="2" bg="gray.100">
+          color="gray.100"
+        >
+          <ThemeIcon />
+        </Flex>
+      </BackNav>
+      <Flex grow="1" py="4" px="2" bg={flexBgColor}>
         <Container
           py="6"
           px="4"
           boxShadow="lg"
           rounded="md"
-          bg="white"
           alignSelf="center"
+          bg={containerBgColor}
         >
           <Heading as="h2" size="xl" mb="4">
             Registrarse
@@ -170,7 +175,7 @@ const Signup = () => {
               </FormControl>
             </Stack>
             <Box mt="10">
-              <Text fontSize="sm" color="gray.700" textAlign="center" mb="3">
+              <Text fontSize="sm" textAlign="center" mb="3">
                 ¿Ya tenés tu cuenta?{" "}
                 <Link
                   as={RouterLink}

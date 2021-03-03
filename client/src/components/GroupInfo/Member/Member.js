@@ -1,19 +1,9 @@
 import React from "react";
-import {
-  Badge,
-  Box,
-  Flex,
-  Icon,
-  IconButton,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuList,
-} from "@chakra-ui/react";
+import { Badge, Box, Flex, MenuItem } from "@chakra-ui/react";
 
-import UserPreview from "../../UI/Users/UserPreview/UserPreview";
-import { HiDotsVertical } from "react-icons/hi";
 import { useAuth } from "../../../context/AuthContext";
+import Menu from "../../UI/Menu/Menu";
+import UserPreview from "../../UI/Users/UserPreview/UserPreview";
 
 const Member = ({ user, isAdmin, admins, onGroupAction }) => {
   const { currentUser } = useAuth();
@@ -35,37 +25,18 @@ const Member = ({ user, isAdmin, admins, onGroupAction }) => {
 
     adminMenu = (
       <Box ml="2">
-        <Menu autoSelect={false}>
-          <MenuButton
-            as={IconButton}
-            icon={<Icon as={HiDotsVertical} color="gray.700" />}
-            size="sm"
-          />
-          <MenuList color="gray.900" shadow="md">
-            {adminMenuItem}
-            <MenuItem
-              color="red.700"
-              onClick={() => onGroupAction("REMOVE_MEMBER")}
-            >
-              Eliminar del Grupo
-            </MenuItem>
-          </MenuList>
+        <Menu menuColor="gray">
+          {adminMenuItem}
+          <MenuItem onClick={() => onGroupAction("REMOVE_MEMBER")}>
+            Eliminar del Grupo
+          </MenuItem>
         </Menu>
       </Box>
     );
   }
 
   return (
-    <Flex
-      py="4"
-      px="2"
-      _hover={{ bgColor: "gray.50" }}
-      transition="ease-out"
-      transitionDuration=".3s"
-      justify="space-between"
-      align="center"
-    >
-      <UserPreview userData={user} />
+    <UserPreview userData={user}>
       <Flex align="center">
         {isMemberAdmin && (
           <Badge colorScheme="purple" variant="subtle">
@@ -74,7 +45,7 @@ const Member = ({ user, isAdmin, admins, onGroupAction }) => {
         )}
         {adminMenu}
       </Flex>
-    </Flex>
+    </UserPreview>
   );
 };
 

@@ -1,10 +1,13 @@
 import React from "react";
-import { Avatar, Box, Flex, Text } from "@chakra-ui/react";
+import { Avatar, Box, Flex, Text, useColorModeValue } from "@chakra-ui/react";
 
 import { useAuth } from "../../../context/AuthContext";
 
 const Message = ({ msg }) => {
   const { currentUser } = useAuth();
+
+  const colorYellow = useColorModeValue("yellow.300", "purple.700");
+  const colorGray = useColorModeValue("gray.200", "gray.700");
 
   const sentByMe = msg.sender._id === currentUser.userId;
   let messagePosition = "flex-start";
@@ -26,11 +29,7 @@ const Message = ({ msg }) => {
       />
     );
 
-    nameElement = (
-      <Text fontSize="sm" color="gray.500">
-        {msg.sender.fullname}
-      </Text>
-    );
+    nameElement = <Text fontSize="sm">{msg.sender.fullname}</Text>;
   }
 
   return (
@@ -42,7 +41,7 @@ const Message = ({ msg }) => {
           rounded="md"
           px="3"
           py="1"
-          bgColor={sentByMe ? "yellow.200" : "gray.200"}
+          bgColor={sentByMe ? colorYellow : colorGray}
         >
           <Text>{msg.text}</Text>
         </Box>
