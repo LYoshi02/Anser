@@ -10,6 +10,7 @@ import { useAuth } from "../../context/AuthContext";
 import Message from "./Message/Message";
 import ChatInfo from "./ChatInfo/ChatInfo";
 import MessageInput from "./MessageInput/MessageInput";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const SingleChat = (props) => {
   const { token } = useAuth();
@@ -31,7 +32,7 @@ const SingleChat = (props) => {
         setActiveUser(res.data.user);
       })
       .catch((error) => {
-        console.log(error);
+        showErrorMessageToast(error);
       });
     return () => setActiveUser(null);
   }, [setActiveUser, token, userParam]);
@@ -83,7 +84,7 @@ const SingleChat = (props) => {
       })
       .catch((error) => {
         setText("");
-        console.log(error);
+        showErrorMessageToast(error);
       });
   };
 

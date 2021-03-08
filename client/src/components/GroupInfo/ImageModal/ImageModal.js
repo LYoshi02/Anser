@@ -14,6 +14,7 @@ import ImageSelector from "../../Profile/ProfileImage/ImageSelector/ImageSelecto
 import ImageCropper from "../../Profile/ProfileImage/ImageCropper/ImageCropper";
 import getCroppedImg from "../../../util/cropImage";
 import { useAuth } from "../../../context/AuthContext";
+import { showErrorMessageToast } from "../../../util/helpers";
 
 const ImageModal = ({ isOpen, onCloseModal, onUpdateChat, currentChat }) => {
   const { token } = useAuth();
@@ -56,12 +57,7 @@ const ImageModal = ({ isOpen, onCloseModal, onUpdateChat, currentChat }) => {
     } catch (error) {
       setReqLoading(false);
       closeModal();
-      toast({
-        title: "Error!",
-        description: "Se produjo un error al subir la imagen.",
-        status: "error",
-        isClosable: true,
-      });
+      showErrorMessageToast(error);
     }
   };
 
@@ -85,12 +81,7 @@ const ImageModal = ({ isOpen, onCloseModal, onUpdateChat, currentChat }) => {
       .catch((error) => {
         setReqLoading(false);
         closeModal();
-        toast({
-          title: "Error!",
-          description: "Se produjo un error al eliminar la imagen.",
-          status: "error",
-          isClosable: true,
-        });
+        showErrorMessageToast(error);
       });
   };
 

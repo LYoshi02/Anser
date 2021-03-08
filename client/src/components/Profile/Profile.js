@@ -24,6 +24,7 @@ import axios from "../../axios-instance";
 import BackNav from "../UI/BackNav/BackNav";
 import { useAuth } from "../../context/AuthContext";
 import { Link } from "react-router-dom";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const Profile = () => {
   const { currentUser, token, updateCurrentUser } = useAuth();
@@ -64,14 +65,8 @@ const Profile = () => {
           });
         })
         .catch((error) => {
-          console.log(error);
           setLoadingReq(false);
-          toast({
-            title: "Error",
-            description: "Se produjo un error al actualizar tu perfil",
-            status: "error",
-            isClosable: true,
-          });
+          showErrorMessageToast(error);
         });
     },
   });

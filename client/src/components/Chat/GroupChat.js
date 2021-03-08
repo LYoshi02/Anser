@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, useToast } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import { useRecoilState } from "recoil";
 
 import axios from "../../axios-instance";
@@ -11,6 +11,7 @@ import Message from "./Message/Message";
 import ChatInfo from "./ChatInfo/ChatInfo";
 import GroupMenu from "./GroupMenu/GroupMenu";
 import MessageInput from "./MessageInput/MessageInput";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const GroupChat = (props) => {
   const { token, currentUser } = useAuth();
@@ -20,7 +21,6 @@ const GroupChat = (props) => {
   const [currentChat, setCurrentChat] = useRecoilState(
     currentGroupChatSelector
   );
-  const toast = useToast();
 
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
@@ -78,7 +78,7 @@ const GroupChat = (props) => {
         setCurrentChat(updatedChat);
       })
       .catch((error) => {
-        console.log(error);
+        showErrorMessageToast(error);
       });
   };
 
@@ -104,15 +104,7 @@ const GroupChat = (props) => {
         setCurrentChat(currentChatUpdated);
       })
       .catch((error) => {
-        const message = error.response
-          ? error.response.data.message
-          : error.message;
-        toast({
-          title: "Error!",
-          description: message,
-          status: "error",
-          isClosable: true,
-        });
+        showErrorMessageToast(error);
       });
   };
 

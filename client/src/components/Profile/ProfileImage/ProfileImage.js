@@ -8,6 +8,7 @@ import ImageCropper from "./ImageCropper/ImageCropper";
 import ImageSelector from "./ImageSelector/ImageSelector";
 import { useAuth } from "../../../context/AuthContext";
 import getCroppedImg from "../../../util/cropImage";
+import { showErrorMessageToast } from "../../../util/helpers";
 
 const ProfileImage = () => {
   const [image, setImage] = useState(null);
@@ -47,12 +48,7 @@ const ProfileImage = () => {
       })
       .catch((error) => {
         setReqLoading(false);
-        toast({
-          title: "Error!",
-          description: "Se produjo un error al eliminar la imagen.",
-          status: "error",
-          isClosable: true,
-        });
+        showErrorMessageToast(error);
       });
   };
 
@@ -80,12 +76,7 @@ const ProfileImage = () => {
       history.replace("/profile");
     } catch (error) {
       setReqLoading(false);
-      toast({
-        title: "Error!",
-        description: "Se produjo un error al subir la imagen.",
-        status: "error",
-        isClosable: true,
-      });
+      showErrorMessageToast(error);
     }
   };
 

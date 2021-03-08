@@ -1,4 +1,4 @@
-import { Flex, useToast } from "@chakra-ui/react";
+import { Flex } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import { useRecoilState } from "recoil";
 
@@ -10,6 +10,7 @@ import BackNav from "../UI/BackNav/BackNav";
 import Info from "./Info/Info";
 import ImageModal from "./ImageModal/ImageModal";
 import MembersModal from "./MembersModal/MembersModal";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const GroupInfo = (props) => {
   const [membersModalOpen, setMembersModalOpen] = useState(false);
@@ -24,7 +25,6 @@ const GroupInfo = (props) => {
   const [selectedMembers, setSelectedMembers] = useRecoilState(
     selectedUsersAtom
   );
-  const toast = useToast();
 
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
@@ -66,10 +66,7 @@ const GroupInfo = (props) => {
         updateCurrentChat(res.data);
       })
       .catch((error) => {
-        const message = error.response
-          ? error.response.data.message
-          : error.message;
-        showToastError(message);
+        showErrorMessageToast(error);
       });
   };
 
@@ -95,12 +92,9 @@ const GroupInfo = (props) => {
         setReqLoading(false);
       })
       .catch((error) => {
-        const message = error.response
-          ? error.response.data.message
-          : error.message;
         setMembersModalOpen(false);
         setReqLoading(false);
-        showToastError(message);
+        showErrorMessageToast(error);
       });
   };
 
@@ -118,20 +112,8 @@ const GroupInfo = (props) => {
         updateCurrentChat(res.data);
       })
       .catch((error) => {
-        const message = error.response
-          ? error.response.data.message
-          : error.message;
-        showToastError(message);
+        showErrorMessageToast(error);
       });
-  };
-
-  const showToastError = (message) => {
-    toast({
-      title: "Error!",
-      description: message,
-      status: "error",
-      isClosable: true,
-    });
   };
 
   const updateCurrentChat = (updatedProperties) => {

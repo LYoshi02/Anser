@@ -12,7 +12,6 @@ import {
   Text,
   Link,
   FormErrorMessage,
-  useToast,
   InputGroup,
   InputRightElement,
   IconButton,
@@ -26,12 +25,12 @@ import * as Yup from "yup";
 import { useAuth } from "../../../context/AuthContext";
 import BackNav from "../../UI/BackNav/BackNav";
 import ThemeIcon from "../../UI/ThemeIcon/ThemeIcon";
+import { showErrorMessageToast } from "../../../util/helpers";
 
 const Login = () => {
   const [reqLoading, setReqLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { login } = useAuth();
-  const toast = useToast();
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -49,12 +48,7 @@ const Login = () => {
         await login(values);
       } catch (error) {
         setReqLoading(false);
-        toast({
-          title: "Error!",
-          description: error.message,
-          status: "error",
-          isClosable: true,
-        });
+        showErrorMessageToast(error);
       }
     },
   });

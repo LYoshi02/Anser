@@ -42,7 +42,7 @@ const User = (props) => {
       .catch((error) => {
         const message = error.response
           ? error.response.data.message
-          : "Seun error al buscar al usuario";
+          : "Se produjo un error al buscar al usuario";
         setError(message);
         setLoading(false);
       });

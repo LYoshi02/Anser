@@ -11,6 +11,7 @@ import { usersAtom } from "../../recoil/atoms";
 import UsersLoading from "../UI/Users/UsersLoading/UsersLoading";
 import UsersNotFound from "../UI/Users/UsersNotFound/UsersNotFound";
 import UserSelect from "../UI/Users/UserSelect/UserSelect";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const Users = ({ selection, onSelectUser, selectedUsers }) => {
   const { token } = useAuth();
@@ -39,7 +40,7 @@ const Users = ({ selection, onSelectUser, selectedUsers }) => {
         })
         .catch((error) => {
           setLoadingReq(false);
-          console.log(error);
+          showErrorMessageToast(error);
         });
     },
     [setUsers, token, selectedUsers]

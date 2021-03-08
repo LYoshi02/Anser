@@ -10,6 +10,7 @@ import Users from "../Users/Users";
 import NameModal from "./NameModal/NameModal";
 import { selectedUsersAtom, chatsAtom } from "../../recoil/atoms";
 import { useAuth } from "../../context/AuthContext";
+import { showErrorMessageToast } from "../../util/helpers";
 
 const NewGroup = () => {
   const { token } = useAuth();
@@ -57,7 +58,7 @@ const NewGroup = () => {
         history.replace(`/chats/group/${res.data.chat._id}`);
       })
       .catch((error) => {
-        console.log(error);
+        showErrorMessageToast(error);
       });
   };
 
