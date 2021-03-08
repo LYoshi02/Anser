@@ -3,7 +3,7 @@ import { Flex, Icon, useColorModeValue } from "@chakra-ui/react";
 import { HiChevronLeft } from "react-icons/hi";
 import { useHistory } from "react-router-dom";
 
-const BackNav = ({ children }) => {
+const BackNav = ({ children, isBackRequired }) => {
   const history = useHistory();
 
   const colorMainNavbar = useColorModeValue("purple.700", "gray.900");
@@ -17,6 +17,7 @@ const BackNav = ({ children }) => {
         color="gray.200"
         onClick={() => history.goBack()}
         cursor="pointer"
+        d={!isBackRequired && { base: "block", lg: "none" }}
       />
       {children}
     </Flex>

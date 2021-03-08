@@ -16,9 +16,9 @@ import Profile from "./components/Profile/Profile";
 import ProfileImage from "./components/Profile/ProfileImage/ProfileImage";
 import SingleChat from "./components/Chat/SingleChat";
 import Signup from "./components/Auth/Signup/Signup";
-import SocketListener from "./components/SocketListener/SocketListener";
 import User from "./components/User/User";
 import { useAuth } from "./context/AuthContext";
+import ChatLayout from "./components/Layout/ChatLayout";
 
 function App() {
   const { currentUser } = useAuth();
@@ -26,7 +26,7 @@ function App() {
   let routes = null;
   if (currentUser) {
     routes = (
-      <SocketListener>
+      <ChatLayout>
         <Switch>
           <Route exact path="/" component={Home} />
           <Route exact path="/profile" component={Profile} />
@@ -38,7 +38,7 @@ function App() {
           <Route path="/new-group" component={NewGroup} />
           <Redirect to="/" />
         </Switch>
-      </SocketListener>
+      </ChatLayout>
     );
   } else {
     routes = (

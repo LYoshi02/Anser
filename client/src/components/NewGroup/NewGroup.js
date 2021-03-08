@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useHistory } from "react-router-dom";
 import { useSetRecoilState, useRecoilState } from "recoil";
-import { Badge, Box, Button, Text, Wrap, WrapItem } from "@chakra-ui/react";
+import { Badge, Box, IconButton, Text, Wrap, WrapItem } from "@chakra-ui/react";
+import { HiArrowRight } from "react-icons/hi";
 
 import axios from "../../axios-instance";
 import BackNav from "../UI/BackNav/BackNav";
@@ -67,15 +68,16 @@ const NewGroup = () => {
   let actionButton = null;
   if (selectedUsers.length > 0) {
     actionButton = (
-      <Button
-        isFullWidth
-        colorScheme="purple"
-        position="fixed"
-        bottom="0"
-        onClick={toggleModal}
-      >
-        Siguiente
-      </Button>
+      <Box position="fixed" bottom="0" right="0" pr="8" pb="4">
+        <IconButton
+          colorScheme="purple"
+          onClick={toggleModal}
+          fontSize="25px"
+          icon={<HiArrowRight />}
+          rounded="full"
+          size="lg"
+        />
+      </Box>
     );
   }
 
@@ -106,7 +108,7 @@ const NewGroup = () => {
   }
 
   return (
-    <Box>
+    <Box width="100%">
       <BackNav />
       <Box p="2">
         <Text fontSize="lg" mb="1">

@@ -46,17 +46,13 @@ const NameModal = ({ isOpen, onClose, onCreateGroup }) => {
         <ModalCloseButton />
         <form onSubmit={formik.handleSubmit}>
           <ModalBody pb={6}>
-            <FormControl
-              id="name"
-              isInvalid={formik.touched.name && formik.errors.name}
-            >
+            <FormControl id="name" isInvalid={formik.errors.name}>
               <FormLabel>Nombre</FormLabel>
               <Input
                 ref={initialRef}
                 placeholder="Nombre"
                 value={formik.values.name}
                 onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
               />
               <FormErrorMessage>{formik.errors.name}</FormErrorMessage>
             </FormControl>

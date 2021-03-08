@@ -173,7 +173,7 @@ const GroupInfo = (props) => {
 
   return (
     <Flex h="full" direction="column" maxH="100%">
-      <BackNav />
+      <BackNav isBackRequired />
       <Info
         isAdmin={isAdmin}
         currentChat={currentChat}

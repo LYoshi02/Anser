@@ -28,7 +28,11 @@ const SearchInput = ({ onSearchUser }) => {
   return (
     <Box p="2">
       <InputGroup>
-        <InputLeftElement pointerEvents="none" children={<HiSearch />} />
+        <InputLeftElement
+          pointerEvents="none"
+          children={<HiSearch />}
+          zIndex="-1"
+        />
         <Input
           type="text"
           placeholder="Buscar usuario"

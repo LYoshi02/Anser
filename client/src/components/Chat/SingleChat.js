@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
-import { Box, Flex, IconButton, Input } from "@chakra-ui/react";
+import { Box, Flex } from "@chakra-ui/react";
 import BackNav from "../UI/BackNav/BackNav";
-import { HiPaperAirplane } from "react-icons/hi";
 import { useRecoilState } from "recoil";
 
 import axios from "../../axios-instance";
@@ -10,6 +9,7 @@ import { currentSingleChatSelector } from "../../recoil/selectors";
 import { useAuth } from "../../context/AuthContext";
 import Message from "./Message/Message";
 import ChatInfo from "./ChatInfo/ChatInfo";
+import MessageInput from "./MessageInput/MessageInput";
 
 const SingleChat = (props) => {
   const { token } = useAuth();
@@ -104,29 +104,14 @@ const SingleChat = (props) => {
       <BackNav>{chatInfo}</BackNav>
       <Flex
         direction="column"
-        p="2"
         justify="space-between"
         grow="1"
         overflow="hidden"
       >
-        <Box overflow="auto">{messages}</Box>
-        <Flex>
-          <Input
-            placeholder="Escribe tu mensaje..."
-            mr="2"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyPress={(e) => (e.key === "Enter" ? sendMessage() : null)}
-            required
-          />
-          <IconButton
-            colorScheme="purple"
-            icon={<HiPaperAirplane />}
-            rounded="full"
-            sx={{ transform: "rotateZ(90deg)" }}
-            onClick={sendMessage}
-          />
-        </Flex>
+        <Box overflow="auto" p="2">
+          {messages}
+        </Box>
+        <MessageInput onSendMessage={sendMessage} />
       </Flex>
     </Flex>
   );

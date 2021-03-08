@@ -9,7 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { HiPaperAirplane } from "react-icons/hi";
 
-const MessageInput = ({ onSendMessage, isMember }) => {
+const MessageInput = ({ onSendMessage, isMember = true }) => {
   const [text, setText] = useState("");
 
   const sendMessageHandler = () => {

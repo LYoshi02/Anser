@@ -80,7 +80,7 @@ const Signup = () => {
 
   return (
     <Flex minH="100vh" direction="column">
-      <BackNav>
+      <BackNav isBackRequired>
         <Flex
           w="full"
           justify="flex-end"
