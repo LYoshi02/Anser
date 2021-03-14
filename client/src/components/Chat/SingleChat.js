@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useRef } from "react";
 import { Box, Flex } from "@chakra-ui/react";
 import BackNav from "../UI/BackNav/BackNav";
 import { useRecoilState } from "recoil";
@@ -14,11 +14,11 @@ import { showErrorMessageToast } from "../../util/helpers";
 
 const SingleChat = (props) => {
   const { token } = useAuth();
-  const [text, setText] = useState("");
   const [activeUser, setActiveUser] = useRecoilState(activeUserAtom);
   const [currentChat, setCurrentChat] = useRecoilState(
     currentSingleChatSelector
   );
+  const messagesEndRef = useRef(null);
 
   const userParam = props.match.params.user;
   useEffect(() => {
@@ -38,13 +38,21 @@ const SingleChat = (props) => {
   }, [setActiveUser, token, userParam]);
 
   useEffect(() => {
+    scrollToBottom();
+  });
+
+  useEffect(() => {
     if (currentChat && currentChat.newMessage) {
       const updatedChat = { ...currentChat, newMessage: false };
       setCurrentChat(updatedChat);
     }
   }, [currentChat, setCurrentChat]);
 
-  const sendMessage = () => {
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView();
+  };
+
+  const sendMessage = (text) => {
     const trimmedText = text.trim();
     if (trimmedText.length === 0) return;
 
@@ -80,10 +88,8 @@ const SingleChat = (props) => {
         }
 
         setCurrentChat(updatedChat);
-        setText("");
       })
       .catch((error) => {
-        setText("");
         showErrorMessageToast(error);
       });
   };
@@ -111,6 +117,7 @@ const SingleChat = (props) => {
       >
         <Box overflow="auto" p="2">
           {messages}
+          <div ref={messagesEndRef} />
         </Box>
         <MessageInput onSendMessage={sendMessage} />
       </Flex>

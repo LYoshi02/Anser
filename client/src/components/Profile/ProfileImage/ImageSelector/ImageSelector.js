@@ -1,6 +1,13 @@
 import React from "react";
 import { useDropzone } from "react-dropzone";
-import { Box, Button, Flex, Image, useToast } from "@chakra-ui/react";
+import {
+  Box,
+  Button,
+  Flex,
+  Image,
+  useToast,
+  useColorModeValue,
+} from "@chakra-ui/react";
 
 const ImageSelector = ({ onSelectImage, image, onDeleteImage, loading }) => {
   const toast = useToast();
@@ -22,6 +29,8 @@ const ImageSelector = ({ onSelectImage, image, onDeleteImage, loading }) => {
     },
   });
 
+  const bgColor = useColorModeValue("gray.200", "gray.900");
+
   return (
     <Box>
       <Box {...getRootProps()}>
@@ -30,7 +39,7 @@ const ImageSelector = ({ onSelectImage, image, onDeleteImage, loading }) => {
           w="100%"
           align="center"
           justify="center"
-          bgColor={!image && "gray.200"}
+          bgColor={!image && bgColor}
         >
           <input {...getInputProps()} name="image" />
           {image ? (

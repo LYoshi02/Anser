@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Box, Flex } from "@chakra-ui/react";
 import { useRecoilState } from "recoil";
 
@@ -15,12 +15,13 @@ import { showErrorMessageToast } from "../../util/helpers";
 
 const GroupChat = (props) => {
   const { token, currentUser } = useAuth();
-  const [isMember, setIsMember] = useState(false);
+  const [isMember, setIsMember] = useState(true);
   const [receivers, setReceivers] = useState(null);
   const [activeChatId, setActiveChatId] = useRecoilState(activeChatIdAtom);
   const [currentChat, setCurrentChat] = useRecoilState(
     currentGroupChatSelector
   );
+  const messagesEndRef = useRef(null);
 
   const chatIdParam = props.match.params.chatId;
   useEffect(() => {
@@ -29,10 +30,8 @@ const GroupChat = (props) => {
   }, [setActiveChatId, chatIdParam]);
 
   useEffect(() => {
-    if (currentChat) {
-      setIsMember(currentChat.users.some((u) => u._id === currentUser.userId));
-    }
-  }, [currentChat, currentUser.userId]);
+    scrollToBottom();
+  });
 
   useEffect(() => {
     if (currentChat) {
@@ -40,6 +39,7 @@ const GroupChat = (props) => {
         (user) => user._id !== currentUser.userId
       );
       setReceivers(receivers);
+      setIsMember(currentChat.users.some((u) => u._id === currentUser.userId));
     }
   }, [currentChat, currentUser.userId]);
 
@@ -49,6 +49,10 @@ const GroupChat = (props) => {
       setCurrentChat(updatedChat);
     }
   }, [currentChat, setCurrentChat]);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView();
+  };
 
   const sendMessage = (message) => {
     const trimmedText = message.trim();
@@ -114,7 +118,6 @@ const GroupChat = (props) => {
     messages = currentChat.messages.map((msg) => (
       <Message key={msg._id} msg={msg} />
     ));
-
     chatInfo = <ChatInfo group={currentChat.group} />;
   }
 
@@ -134,6 +137,7 @@ const GroupChat = (props) => {
       >
         <Box overflow="auto" p="2">
           {messages}
+          <div ref={messagesEndRef} />
         </Box>
         <MessageInput onSendMessage={sendMessage} isMember={isMember} />
       </Flex>

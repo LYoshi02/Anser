@@ -128,7 +128,7 @@ const Info = ({
             </Button>
           )}
         </Flex>
-        <Box mt="2">{groupMembers}</Box>
+        <Box my="2">{groupMembers}</Box>
       </Box>
     </Container>
   );

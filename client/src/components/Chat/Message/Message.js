@@ -42,6 +42,7 @@ const Message = ({ msg }) => {
           px="3"
           py="1"
           bgColor={sentByMe ? colorYellow : colorGray}
+          display="inline-block"
         >
           <Text>{msg.text}</Text>
         </Box>
